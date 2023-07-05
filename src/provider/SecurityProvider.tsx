@@ -65,6 +65,10 @@ export default class SecurityProvider {
     return this.isComponentActive(TenantComponents.BILLING);
   }
 
+  public isComponentReservationActive(): boolean {
+    return this.isComponentActive(TenantComponents.RESERVATION);
+  }
+
   public isComponentActive(componentName: string): boolean {
     if (this.loggedUser && this.loggedUser.activeComponents) {
       return this.loggedUser.activeComponents.includes(componentName);
@@ -108,9 +112,13 @@ export default class SecurityProvider {
   }
 
   public canAccess(resource: string, action: string): boolean {
-    return this.loggedUser && this.loggedUser.scopes && (this.loggedUser.scopes.includes(`${resource}:${action}`)
-      //TODO remove the plural (s) when backend new authorization deployed
-      || this.loggedUser.scopes.includes(`${resource}s:${action}`));
+    return (
+      this.loggedUser &&
+      this.loggedUser.scopes &&
+      (this.loggedUser.scopes.includes(`${resource}:${action}`) ||
+        // TODO remove the plural (s) when backend new authorization deployed
+        this.loggedUser.scopes.includes(`${resource}s:${action}`))
+    );
   }
 
   public canListUsers(): boolean {
@@ -131,5 +139,9 @@ export default class SecurityProvider {
 
   public canListPaymentMethods(): boolean {
     return this.canAccess(Entity.PAYMENT_METHOD, Action.LIST);
+  }
+
+  public canListReservations(): boolean {
+    return this.canAccess(Entity.RESERVATION, Action.LIST);
   }
 }
