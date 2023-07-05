@@ -18,6 +18,7 @@
   ],
   "scripts": {
     "preinstall": "node skip-preinstall.cjs || npx --yes only-allow pnpm",
+    "prepare": "node prepare.cjs",
     "postinstall": "patch-package & npx jetify",
     "start": "react-native start",
     "start:debug": "cross-env REACT_DEBUGGER=\"rndebugger-open --open --port 8081\" npm start",
