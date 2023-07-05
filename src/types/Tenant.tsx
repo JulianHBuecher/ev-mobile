@@ -1,5 +1,5 @@
-import CreatedUpdatedProps from "./CreatedUpdatedProps";
-import ListItem from "./ListItem";
+import CreatedUpdatedProps from './CreatedUpdatedProps';
+import ListItem from './ListItem';
 
 export default interface Tenant extends CreatedUpdatedProps, ListItem {
   name: string;
@@ -42,17 +42,17 @@ export interface EndpointCloud {
 }
 
 export enum TenantComponents {
-  OCPI = "ocpi",
-  OICP = "oicp",
-  REFUND = "refund",
-  PRICING = "pricing",
-  ORGANIZATION = "organization",
-  STATISTICS = "statistics",
-  ANALYTICS = "analytics",
-  BILLING = "billing",
-  ASSET = "asset",
-  SMART_CHARGING = "smartCharging",
-  CAR = "car",
-  CAR_CONNECTOR = "carConnector",
-  RESERVATION = "reservation"
+  OCPI = 'ocpi',
+  OICP = 'oicp',
+  REFUND = 'refund',
+  PRICING = 'pricing',
+  ORGANIZATION = 'organization',
+  STATISTICS = 'statistics',
+  ANALYTICS = 'analytics',
+  BILLING = 'billing',
+  ASSET = 'asset',
+  SMART_CHARGING = 'smartCharging',
+  CAR = 'car',
+  CAR_CONNECTOR = 'carConnector',
+  RESERVATION = 'reservation'
 }

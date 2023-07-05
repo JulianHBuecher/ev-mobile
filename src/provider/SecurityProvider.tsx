@@ -1,7 +1,7 @@
-import { Action, Entity, Role } from "../types/Authorization";
-import SiteArea from "../types/SiteArea";
-import { TenantComponents } from "../types/Tenant";
-import UserToken from "../types/UserToken";
+import { Action, Entity, Role } from '../types/Authorization';
+import SiteArea from '../types/SiteArea';
+import { TenantComponents } from '../types/Tenant';
+import UserToken from '../types/UserToken';
 
 export default class SecurityProvider {
   private loggedUser: UserToken;

@@ -2,7 +2,8 @@
   "name": "ev-mobile",
   "version": "2.6.10",
   "engines": {
-    "npm": ">=8.x.x"
+    "node": ">=16.x.x",
+    "npm run": ">=8.x.x"
   },
   "repository": {
     "type": "git",
@@ -17,20 +18,19 @@
     }
   ],
   "scripts": {
-    "preinstall": "node skip-preinstall.cjs || npx --yes only-allow pnpm",
     "prepare": "node prepare.cjs",
     "postinstall": "patch-package & npx jetify",
     "start": "react-native start",
     "start:debug": "cross-env REACT_DEBUGGER=\"rndebugger-open --open --port 8081\" npm start",
-    "start:clean": "npm start -- --reset-cache",
-    "projects:clean": "pnpm android:clean && pnpm ios:clean",
+    "start:clean": "npm run start -- --reset-cache",
+    "projects:clean": "npm run android:clean && npm run ios:clean",
     "install:clean": "rimraf package-lock.json && rimraf node_modules && npm cache clear --force && npm install --force",
     "android": "cross-env TSC_WATCHFILE=UseFsEventsWithFallbackDynamicPolling react-native run-android",
     "android:release": "react-native run-android --variant=release",
-    "android:bundleRelease": "pnpm android:jetify && cd android && ./gradlew bundleRelease",
-    "android:bundleDebug": "pnpm android:jetify && cd android && ./gradlew bundleDebug",
-    "android:assembleRelease": "pnpm android:jetify && cd android && ./gradlew assembleRelease",
-    "android:assembleDebug": "pnpm android:jetify && cd android && ./gradlew assembleDebug",
+    "android:bundleRelease": "npm run android:jetify && cd android && ./gradlew bundleRelease",
+    "android:bundleDebug": "npm run android:jetify && cd android && ./gradlew bundleDebug",
+    "android:assembleRelease": "npm run android:jetify && cd android && ./gradlew assembleRelease",
+    "android:assembleDebug": "npm run android:jetify && cd android && ./gradlew assembleDebug",
     "android:bundle": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/",
     "android:clean": "cd android && ./gradlew clean && cd ..",
     "android:jetify": "npx jetify",
@@ -49,6 +49,7 @@
     "precommit": "npm test",
     "lint": "cross-env TIMING=1 eslint src __tests__ types App.tsx --ext .js,.ts,.tsx",
     "lint:fix": "cross-env TIMING=1 eslint src __tests__ types App.tsx --fix --ext .js,.ts,.tsx",
+    "format": "prettier --cache --write .",
     "tsc": "tsc",
     "tsc-stats": "tsc --diagnostics --listFiles",
     "npm-check": "npm-check",
@@ -182,6 +183,7 @@
     "eslint-define-config": "^1.12.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jsdoc": "^39.6.2",
+    "eslint-plugin-n": "^16.0.1",
     "eslint-plugin-prefer-arrow": "^1.2.3",
     "eslint-plugin-react": "^7.31.11",
     "flow-bin": "^0.193.0",

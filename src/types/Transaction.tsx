@@ -112,4 +112,3 @@ export interface SmartChargingSessionParameters {
   carStateOfCharge: number;
   targetStateOfCharge: number;
 }
-

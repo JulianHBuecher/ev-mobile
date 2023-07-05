@@ -1,10 +1,10 @@
-import { ReservationAuthorizationActions } from './Authorization';
-import { Car } from './Car';
+import Car from './Car';
 import ChargingStation from './ChargingStation';
 import CreatedUpdatedProps from './CreatedUpdatedProps';
+import ListItem from './ListItem';
 import Tag from './Tag';
 
-export default interface Reservation extends CreatedUpdatedProps, ReservationAuthorizationActions {
+export default interface Reservation extends CreatedUpdatedProps, ListItem {
   id: number;
   chargingStationID: string;
   chargingStation?: ChargingStation;
@@ -28,12 +28,12 @@ export enum ReservationStatus {
   SCHEDULED = 'reservation_scheduled',
   IN_PROGRESS = 'reservation_in_progress',
   CANCELLED = 'reservation_cancelled',
-  EXPIRED = 'reservation_expired',
+  EXPIRED = 'reservation_expired'
 }
 
 export enum ReservationType {
   PLANNED_RESERVATION = 'planned_reservation',
-  RESERVE_NOW = 'reserve_now',
+  RESERVE_NOW = 'reserve_now'
 }
 
 export type ReservationStatusEnum = ReservationStatus;

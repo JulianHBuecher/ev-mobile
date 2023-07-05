@@ -56,13 +56,6 @@ export default class BaseScreen<P, S> extends React.Component<Props, State> {
     this.backHandler?.remove();
   }
 
-  protected setDrawerStatus(): void {
-    const drawer = this.props?.navigation?.getParent('drawer');
-    drawer?.setOptions({
-      swipeEnabled: this.canOpenDrawer
-    });
-  }
-
   public setHeaderComponent(headerComponent: HeaderComponent, headerDisplay?: boolean) {
     if (headerComponent) {
       this.headerComponent = headerComponent;
@@ -105,5 +98,12 @@ export default class BaseScreen<P, S> extends React.Component<Props, State> {
   public componentDidBlur(): void {
     // Unbind the back button and reset its default behavior (Android)
     this.backHandler.remove();
+  }
+
+  protected setDrawerStatus(): void {
+    const drawer = this.props?.navigation?.getParent('drawer');
+    drawer?.setOptions({
+      swipeEnabled: this.canOpenDrawer
+    });
   }
 }
