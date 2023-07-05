@@ -537,6 +537,37 @@
       "message": "An unknown user has just badged on '{{chargeBoxID}}'.",
       "subMessage": "Unknown User",
       "longMessage": "An unknown user has just badged on '{{chargeBoxID}}'."
+    },
+    "reservationCreatedNotification": {
+      "title": "Reservation Created",
+      "body": "Your reservation for charging station '{{chargingStationID}}' on connector '{{connectorID}}' has been created successfully."
+    },
+    "reservationCancelledNotification": {
+      "title": "Reservation Cancelled",
+      "body": "Your reservation for the charging station '{{chargingStationID}}' on connector '{{connectorID}}' has been cancelled successfully."
+    },
+    "reservationUpcomingNotification": {
+      "title": "Reservation Upcoming",
+      "body": "Your reservation on the charging station '{{chargingStationID}}' at connector '{{connectorID}}' is upcoming."
+    },
+    "reservationUpcomingWarning": {
+      "title": "Reservation Upcoming",
+      "body": "There is a reservation upcoming from '{{fromDate}}' to '{{toDate}}' on this charging station '{{chargingStationID}}' at connector '{{connectorID}}'."
+    },
+    "reservedChargingStationBlockedNotification": {
+      "title": "Reserved Charging Station Blocked",
+      "body": "At your currently reserved charging station '{{chargingStationID}}' on connector '{{connectorID}}' a charging session started."
+    },
+    "reservationStatusChanged": {
+      "title": "Reservation Status Changed",
+      "body": "Your reservation for charging station '{{chargingStationID}}' on connector '{{connectorID}}' changed its status.",
+      "status": {
+        "reservation_done": "Reservation Done",
+        "reservation_scheduled": "Reservation Scheduled",
+        "reservation_in_progress": "Reservation In Progress",
+        "reservation_cancelled": "Reservation Cancelled",
+        "reservation_expired": "Reservation Expired"
+      }
     }
   },
   "appUpdate": {
@@ -551,12 +582,70 @@
     "sitesRoamingFilterLabel": "Show roaming sites",
     "siteAreasRoamingFilterLabel": "Show roaming site areas",
     "transactionsRoamingFilterLabel": "Show roaming sessions",
-    "usersRoamingFilterLabel": "Show roaming users"
+    "usersRoamingFilterLabel": "Show roaming users",
+    "showExpiredReservationsLabel": "Show expired reservations"
   },
   "settingsDistanceUnit": {
     "distanceUnit": "Distance unit",
     "kilometers": "Kilometers",
     "miles": "Miles",
     "automatic": "Automatic"
+  },
+  "reservations": {
+    "titles": "Reservations",
+    "description": "Manage reservations on charging stations and connectors",
+    "title": "Reservation",
+    "id": "ID",
+    "chargingstationId": "Charging Station",
+    "connectorId": "Connector",
+    "connectorStatus": "Connector Status",
+    "expiryDate": "Expiration Date",
+    "fromDate": "Valid From",
+    "toDate": "Valid To",
+    "tagId": "Tag",
+    "status": "Status",
+    "type": "Reservation Type",
+    "user": "User",
+    "car": "Car"
+  },
+  "reserve_now": {
+    "title": "Complete Reserve Now",
+    "tooltips": "Reserve Now",
+    "confirm": "Do you really want to reserve the connector '{{connectorID}}' for user '{{userName}}' on the charging station '{{chargingStationID}}'?",
+    "details": "Reserve connector '{{connectorID}}' at chargepoint '{{chargingStationID}}'",
+    "success": "The reservation on the charging station '{{chargingStationID}}' at connector '{{connectorID}}' was successfully",
+    "error": "Error occurred while trying to create a reservation, check the logs"
+  },
+  "cancel_reservation": {
+    "title": "Cancel Reservation",
+    "tooltips": "Cancel Reservation",
+    "confirm": "Do you really want to cancel the reservation at charging station '{{chargingStationID}}'?",
+    "details": "",
+    "success": "The reservation at charging station '{{chargingStationID}}' is successfully canceled",
+    "error": "Error occured while trying to cancel the reservation at charging station '{{chargingStationID}}'"
+  },
+  "create": {
+    "title": "Create Reservation",
+    "tooltips": "Create Reservation",
+    "confirm": "",
+    "details": "",
+    "success": "'{{reservationID}}' has been created successfully",
+    "error": "Error occurred while adding the reservation, check the logs"
+  },
+  "update": {
+    "title": "Update Reservation",
+    "tooltips": "Update Reservation",
+    "confirm": "",
+    "details": "",
+    "success": "The reservation '{{reservationID}}' has been saved successfully",
+    "error": "Cannot change the reservation details, check the logs"
+  },
+  "delete": {
+    "title": "Delete Reservation",
+    "tooltips": "Delete Reservation",
+    "confirm": "Do you really want to delete the reservation '{{reservationID}}'?",
+    "details": "",
+    "success": "The reservation '{{reservationID}}' is successfully deleted",
+    "error": "An error occured during the deletion of the reservation, check the logs"
   }
 }

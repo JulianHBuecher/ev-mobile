@@ -107,6 +107,9 @@ production/
 # Firebase
 android/app/google-services.json
 ios/GoogleService-Info.plist
+firebase*
+.firebase*
+ui-debug.log*
 
 assets/config.json
 *.log

@@ -17,6 +17,7 @@
     }
   ],
   "scripts": {
+    "preinstall": "node skip-preinstall.cjs || npx --yes only-allow pnpm",
     "postinstall": "patch-package & npx jetify",
     "start": "react-native start",
     "start:debug": "cross-env REACT_DEBUGGER=\"rndebugger-open --open --port 8081\" npm start",
@@ -153,6 +154,8 @@
   "devDependencies": {
     "@babel/core": "^7.20.2",
     "@babel/runtime": "^7.20.1",
+    "@commitlint/cli": "^17.6.6",
+    "@commitlint/config-conventional": "^17.6.6",
     "@react-native-community/eslint-config": "^3.2.0",
     "@types/base-64": "^1.0.0",
     "@types/color": "^3.0.3",
@@ -181,6 +184,7 @@
     "eslint-plugin-prefer-arrow": "^1.2.3",
     "eslint-plugin-react": "^7.31.11",
     "flow-bin": "^0.193.0",
+    "husky": "^8.0.3",
     "import-sort-parser-typescript": "^6.0.0",
     "import-sort-style-module": "^6.0.0",
     "jest": "^26.6.3",

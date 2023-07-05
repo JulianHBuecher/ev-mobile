@@ -1,16 +1,16 @@
-import CreatedUpdatedProps from './CreatedUpdatedProps';
-import { TenantComponents } from './Tenant';
+import CreatedUpdatedProps from "./CreatedUpdatedProps";
+import { TenantComponents } from "./Tenant";
 
 export enum TechnicalSettings {
-  USER = 'user',
-  CRYPTO = 'crypto'
+  USER = "user",
+  CRYPTO = "crypto"
 }
 
 export interface Setting extends CreatedUpdatedProps {
   id?: string;
   identifier: TenantComponents | TechnicalSettings;
   sensitiveData?: string[];
-  category?: 'business' | 'technical';
+  category?: "business" | "technical";
 }
 
 export interface SettingDB extends CreatedUpdatedProps, Setting {
@@ -51,8 +51,8 @@ export interface SettingDBContent {
 }
 
 export enum PricingSettingsType {
-  SIMPLE = 'simple',
-  CONVERGENT_CHARGING = 'convergentCharging'
+  SIMPLE = "simple",
+  CONVERGENT_CHARGING = "convergentCharging"
 }
 
 export interface PricingSettings extends Setting {
@@ -66,8 +66,8 @@ export interface PricingSettings extends Setting {
 export interface PricingSetting {}
 
 export enum PricingContentType {
-  SIMPLE = 'simple',
-  CONVERGENT_CHARGING = 'convergentCharging'
+  SIMPLE = "simple",
+  CONVERGENT_CHARGING = "convergentCharging"
 }
 
 export interface SimplePricingSetting extends PricingSetting {
@@ -84,7 +84,7 @@ export interface ConvergentChargingPricingSetting extends PricingSetting {
 }
 
 export enum RoamingSettingsType {
-  GIREVE = 'gireve'
+  GIREVE = "gireve"
 }
 
 export interface RoamingSettings extends Setting {
@@ -119,7 +119,7 @@ export interface OcpiBusinessDetails {
 }
 
 export enum AnalyticsSettingsType {
-  SAC = 'sac'
+  SAC = "sac"
 }
 
 export interface AnalyticsSettings extends Setting {
@@ -135,7 +135,7 @@ export interface SacAnalyticsSetting {
 }
 
 export enum SmartChargingSettingsType {
-  SAP_SMART_CHARGING = 'sapSmartCharging'
+  SAP_SMART_CHARGING = "sapSmartCharging"
 }
 
 export interface SmartChargingSettings extends Setting {
@@ -148,7 +148,7 @@ export interface SmartChargingSettings extends Setting {
 export interface SmartChargingSetting {}
 
 export enum SmartChargingContentType {
-  SAP_SMART_CHARGING = 'sapSmartCharging'
+  SAP_SMART_CHARGING = "sapSmartCharging"
 }
 
 export interface SapSmartChargingSetting extends SmartChargingSetting {
@@ -161,7 +161,7 @@ export interface SapSmartChargingSetting extends SmartChargingSetting {
 }
 
 export enum RefundSettingsType {
-  CONCUR = 'concur'
+  CONCUR = "concur"
 }
 
 export interface RefundSettings extends Setting {
@@ -186,7 +186,7 @@ export interface ConcurRefundSetting extends RefundSetting {
 }
 
 export enum BillingSettingsType {
-  STRIPE = 'stripe'
+  STRIPE = "stripe"
 }
 
 export interface BillingSettings extends Setting {
@@ -213,7 +213,7 @@ export interface StripeBillingSetting extends BillingSetting {
 }
 
 export enum BillingContentType {
-  STRIPE = 'stripe'
+  STRIPE = "stripe"
 }
 
 export interface AssetSettings extends Setting {
@@ -223,7 +223,7 @@ export interface AssetSettings extends Setting {
 }
 
 export enum AssetSettingsType {
-  ASSET = 'asset'
+  ASSET = "asset"
 }
 
 export interface AssetSetting {
@@ -242,8 +242,8 @@ export interface AssetConnectionSetting {
 }
 
 export enum AssetConnectionType {
-  SCHNEIDER = 'schneider',
-  GREENCOM = 'greencom'
+  SCHNEIDER = "schneider",
+  GREENCOM = "greencom"
 }
 
 export interface AssetUserPasswordConnectionType {
@@ -260,7 +260,7 @@ export interface AssetGreencomConnectionType {
 export interface AssetSchneiderConnectionType extends AssetUserPasswordConnectionType {}
 
 export enum CryptoSettingsType {
-  CRYPTO = 'crypto'
+  CRYPTO = "crypto"
 }
 
 export interface CryptoSettings extends Setting {
@@ -281,7 +281,7 @@ export interface CryptoKeyProperties {
   operationMode: string;
 }
 export enum UserSettingsType {
-  USER = 'user'
+  USER = "user"
 }
 
 export interface UserSettings extends Setting {
