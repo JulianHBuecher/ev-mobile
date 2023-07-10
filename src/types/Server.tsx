@@ -501,6 +501,7 @@ export enum RESTServerRoute {
   REST_CHARGING_STATIONS_CHANGE_AVAILABILITY = 'charging-stations/:id/availability/change',
   REST_CHARGING_STATIONS_RESERVE_NOW = 'charging-stations/:id/reserve/now',
   REST_CHARGING_STATIONS_CANCEL_RESERVATION = 'charging-stations/:id/reservation/cancel',
+  REST_CHARGING_STATIONS_RESERVATION_AVAILABILITY = 'charging-stations/reservation/availability',
 
   REST_CHARGING_STATIONS_DOWNLOAD_FIRMWARE = 'charging-stations/firmware/download',
   REST_CHARGING_STATIONS_QRCODE_GENERATE = 'charging-stations/:id/connectors/:connectorId/qrcode/generate',

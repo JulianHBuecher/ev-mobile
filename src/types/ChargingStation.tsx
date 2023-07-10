@@ -46,7 +46,7 @@ export default interface ChargingStation extends CreatedUpdatedProps, ListItem {
 
 export enum OCPPGeneralResponse {
   ACCEPTED = 'Accepted',
-  REJECTED = 'Rejected',
+  REJECTED = 'Rejected'
 }
 
 export enum CurrentType {
@@ -99,6 +99,9 @@ export interface Connector {
   currentType?: CurrentType;
   chargePointID?: number;
   canReadTransaction?: boolean;
+  reservationID?: number;
+  canReserveNow?: boolean;
+  canCancelReservation?: boolean;
 }
 
 export enum ChargePointStatus {

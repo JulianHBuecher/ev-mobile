@@ -105,7 +105,8 @@
     "invoices": "Invoices",
     "paymentMethods": "Payment methods",
     "qrCodeScanner": "QR-Code scanner",
-    "settings": "Settings"
+    "settings": "Settings",
+    "reservations": "Reservations"
   },
   "authentication": {
     "noTenantFoundTitle": "No organization found",
@@ -606,46 +607,62 @@
     "status": "Status",
     "type": "Reservation Type",
     "user": "User",
-    "car": "Car"
-  },
-  "reserve_now": {
-    "title": "Complete Reserve Now",
-    "tooltips": "Reserve Now",
-    "confirm": "Do you really want to reserve the connector '{{connectorID}}' for user '{{userName}}' on the charging station '{{chargingStationID}}'?",
-    "details": "Reserve connector '{{connectorID}}' at chargepoint '{{chargingStationID}}'",
-    "success": "The reservation on the charging station '{{chargingStationID}}' at connector '{{connectorID}}' was successfully",
-    "error": "Error occurred while trying to create a reservation, check the logs"
-  },
-  "cancel_reservation": {
-    "title": "Cancel Reservation",
-    "tooltips": "Cancel Reservation",
-    "confirm": "Do you really want to cancel the reservation at charging station '{{chargingStationID}}'?",
-    "details": "",
-    "success": "The reservation at charging station '{{chargingStationID}}' is successfully canceled",
-    "error": "Error occured while trying to cancel the reservation at charging station '{{chargingStationID}}'"
-  },
-  "create": {
-    "title": "Create Reservation",
-    "tooltips": "Create Reservation",
-    "confirm": "",
-    "details": "",
-    "success": "'{{reservationID}}' has been created successfully",
-    "error": "Error occurred while adding the reservation, check the logs"
-  },
-  "update": {
-    "title": "Update Reservation",
-    "tooltips": "Update Reservation",
-    "confirm": "",
-    "details": "",
-    "success": "The reservation '{{reservationID}}' has been saved successfully",
-    "error": "Cannot change the reservation details, check the logs"
-  },
-  "delete": {
-    "title": "Delete Reservation",
-    "tooltips": "Delete Reservation",
-    "confirm": "Do you really want to delete the reservation '{{reservationID}}'?",
-    "details": "",
-    "success": "The reservation '{{reservationID}}' is successfully deleted",
-    "error": "An error occurred during the deletion of the reservation, check the logs"
+    "car": "Car",
+    "reservationsUnexpectedError": "Cannot read reservations",
+    "reservationDoesNotExist": "Reservation does not exist",
+    "noReservations": "No reservations found",
+    "statuses": {
+      "reservation_done": "Done",
+      "reservation_scheduled": "Scheduled",
+      "reservation_in_progress": "In Progress",
+      "reservation_cancelled": "Cancelled",
+      "reservation_expired": "Expired",
+      "unknown": "Unknown"
+    },
+    "types": {
+      "reserve_now": "Reserve Now",
+      "planned_reservation": "Planned",
+      "unknown": "Unknown"
+    },
+    "reserve_now": {
+      "title": "Reserve Now",
+      "tooltips": "Reserve Now",
+      "confirm": "Do you really want to reserve the connector '{{connectorID}}' for user '{{userName}}' on the charging station '{{chargingStationID}}'?",
+      "details": "Reserve connector '{{connectorID}}' at chargepoint '{{chargingStationID}}'",
+      "success": "The reservation on the charging station '{{chargingStationID}}' at connector '{{connectorID}}' was successfully",
+      "error": "Error occurred while trying to create a reservation, check the logs"
+    },
+    "cancel_reservation": {
+      "title": "Cancel Reservation",
+      "tooltips": "Cancel Reservation",
+      "confirm": "Do you really want to cancel the reservation at charging station '{{chargingStationID}}'?",
+      "details": "",
+      "success": "The reservation at charging station '{{chargingStationID}}' is successfully canceled",
+      "error": "Error occured while trying to cancel the reservation at charging station '{{chargingStationID}}'"
+    },
+    "create": {
+      "title": "Create Reservation",
+      "tooltips": "Create Reservation",
+      "confirm": "",
+      "details": "",
+      "success": "'{{reservationID}}' has been created successfully",
+      "error": "Error occurred while adding the reservation, check the logs"
+    },
+    "update": {
+      "title": "Update Reservation",
+      "tooltips": "Update Reservation",
+      "confirm": "",
+      "details": "",
+      "success": "The reservation '{{reservationID}}' has been saved successfully",
+      "error": "Cannot change the reservation details, check the logs"
+    },
+    "delete": {
+      "title": "Delete Reservation",
+      "tooltips": "Delete Reservation",
+      "confirm": "Do you really want to delete the reservation '{{reservationID}}'?",
+      "details": "",
+      "success": "The reservation '{{reservationID}}' is successfully deleted",
+      "error": "An error occurred during the deletion of the reservation, check the logs"
+    }
   }
 }

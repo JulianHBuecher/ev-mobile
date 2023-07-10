@@ -28,8 +28,7 @@ export enum ReservationStatus {
   SCHEDULED = 'reservation_scheduled',
   IN_PROGRESS = 'reservation_in_progress',
   CANCELLED = 'reservation_cancelled',
-  EXPIRED = 'reservation_expired',
-  COOL = 'reservation_expired'
+  EXPIRED = 'reservation_expired'
 }
 
 export enum ReservationType {

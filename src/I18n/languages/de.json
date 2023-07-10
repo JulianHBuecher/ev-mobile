@@ -105,7 +105,8 @@
     "invoices": "Rechnungen",
     "paymentMethods": "Zahlungsmethoden",
     "qrCodeScanner": "QR-Code Scanner",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "reservations": "Reservierungen"
   },
   "authentication": {
     "noTenantFoundTitle": "Keine Organisation gefunden",
@@ -606,46 +607,62 @@
     "status": "Status",
     "type": "Reservierungs-Typ",
     "user": "Nutzer",
-    "car": "Fahrzeug"
-  },
-  "reserve_now": {
-    "title": "Reservierung abschließen",
-    "tooltips": "Jetzt Reservieren",
-    "confirm": "Wollen Sie für den Nutzer '{{userName}}' an der Ladestation '{{chargingStationID}}' an Anschluss '{{connectorID}}' eine Reservierung tätigen?",
-    "details": "Anschluss '{{connectorID}}' an Ladestation '{{chargingStationID}}' reservieren",
-    "success": "Die Reservierung an Ladestation '{{chargingStationID}}' für Anschluss '{{connectorID}}' wurde erfolgreich durchgeführt",
-    "error": "Beim Versuch eine Reservierung zu tätigen ist ein Fehler aufgetreten"
-  },
-  "cancel_reservation": {
-    "title": "Reservierung stornieren",
-    "tooltips": "Reservierung stornieren",
-    "confirm": "Wollen Sie an der Ladestation '{{chargingStationID}}' die Reservierung stornieren?'",
-    "details": "",
-    "success": "Die Reservierung an der Ladestation '{{chargingStationID}}' wurde erfolgreich storniert",
-    "error": "Beim Versuch die Reservierung an der Ladestation '{{chargingStationID}}' zu stornieren ist ein Fehler aufgetreten"
-  },
-  "create": {
-    "title": "Reservierung erstellen",
-    "tooltips": "Reservierung erstellen",
-    "confirm": "",
-    "details": "",
-    "success": "'{{reservationID}}' wurde erfolgreich erstellt",
-    "error": "Beim Erstellen der Reservierung ist ein Fehler aufgetreten"
-  },
-  "update": {
-    "title": "Reservierung aktualisieren",
-    "tooltips": "Reservierung aktualisieren",
-    "confirm": "",
-    "details": "",
-    "success": "Die Reservierung '{{reservationID}}' wurde erfolgreich gespeichert",
-    "error": "Die Reservierung kann nicht verändert werden, siehe Log-Nachrichten für Details"
-  },
-  "delete": {
-    "title": "Reservierung löschen",
-    "tooltips": "Reservierung löschen",
-    "confirm": "Sind Sie sich sicher, dass Sie die Reservierung '{{reservationID}}' löschen wollen?",
-    "details": "",
-    "success": "Die Reservierung '{{reservationID}}' wurde erfolgreich gelöscht",
-    "error": "Beim Löschen der Reservierung ist ein Fehler aufgetreten"
+    "car": "Fahrzeug",
+    "reservationsUnexpectedError": "Reservierungen können nicht gelesen werden",
+    "reservationDoesNotExist": "Reservierungen konnte nicht gefunden werden",
+    "noReservations": "Keine Reservierungen",
+    "statuses": {
+      "reservation_done": "Abgeschlossen",
+      "reservation_scheduled": "Eingeplant",
+      "reservation_in_progress": "Laufend",
+      "reservation_cancelled": "Storniert",
+      "reservation_expired": "Abgelaufen",
+      "unknown": "Unbekannt"
+    },
+    "types": {
+      "reserve_now": "Reserve Now",
+      "planned_reservation": "Geplant",
+      "unknown": "Unbekannt"
+    },
+    "reserve_now": {
+      "title": "Reservierung",
+      "tooltips": "Jetzt Reservieren",
+      "confirm": "Wollen Sie für den Nutzer '{{userName}}' an der Ladestation '{{chargingStationID}}' an Anschluss '{{connectorID}}' eine Reservierung tätigen?",
+      "details": "Anschluss '{{connectorID}}' an Ladestation '{{chargingStationID}}' reservieren",
+      "success": "Die Reservierung an Ladestation '{{chargingStationID}}' für Anschluss '{{connectorID}}' wurde erfolgreich durchgeführt",
+      "error": "Beim Versuch eine Reservierung zu tätigen ist ein Fehler aufgetreten"
+    },
+    "cancel_reservation": {
+      "title": "Reservierung stornieren",
+      "tooltips": "Reservierung stornieren",
+      "confirm": "Wollen Sie an der Ladestation '{{chargingStationID}}' die Reservierung stornieren?'",
+      "details": "",
+      "success": "Die Reservierung an der Ladestation '{{chargingStationID}}' wurde erfolgreich storniert",
+      "error": "Beim Versuch die Reservierung an der Ladestation '{{chargingStationID}}' zu stornieren ist ein Fehler aufgetreten"
+    },
+    "create": {
+      "title": "Reservierung erstellen",
+      "tooltips": "Reservierung erstellen",
+      "confirm": "",
+      "details": "",
+      "success": "'{{reservationID}}' wurde erfolgreich erstellt",
+      "error": "Beim Erstellen der Reservierung ist ein Fehler aufgetreten"
+    },
+    "update": {
+      "title": "Reservierung aktualisieren",
+      "tooltips": "Reservierung aktualisieren",
+      "confirm": "",
+      "details": "",
+      "success": "Die Reservierung '{{reservationID}}' wurde erfolgreich gespeichert",
+      "error": "Die Reservierung kann nicht verändert werden, siehe Log-Nachrichten für Details"
+    },
+    "delete": {
+      "title": "Reservierung löschen",
+      "tooltips": "Reservierung löschen",
+      "confirm": "Sind Sie sich sicher, dass Sie die Reservierung '{{reservationID}}' löschen wollen?",
+      "details": "",
+      "success": "Die Reservierung '{{reservationID}}' wurde erfolgreich gelöscht",
+      "error": "Beim Löschen der Reservierung ist ein Fehler aufgetreten"
+    }
   }
 }
