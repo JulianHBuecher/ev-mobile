@@ -50,7 +50,7 @@ export default class DateTimePickerComponent extends React.Component<Props, Stat
 
   public render() {
     const style = computeStyleSheet();
-    const { title, dateTime, minimumDateTime, maximumDateTime, locale, is24Hour, navigation, containerStyle } = this.props;
+    const { title, dateTime, minimumDateTime, maximumDateTime, locale, is24Hour, containerStyle } = this.props;
     const commonColors = Utils.getCurrentCommonColor();
     return (
       <View style={[...(containerStyle || [])]}>
@@ -59,7 +59,7 @@ export default class DateTimePickerComponent extends React.Component<Props, Stat
             <View style={style.avatarContainer}>
               <Icon size={scale(28)} style={style.dateIcon} as={Foundation} name={'calendar'} />
             </View>
-            <View style={style.userContainer}>
+            <View style={style.dateTimeContainer}>
               <Text numberOfLines={1} ellipsizeMode={'tail'} style={[style.text, style.title]}>
                 {I18n.t(title)}
               </Text>

@@ -39,6 +39,7 @@ interface State {
   selectedChargingStation: ChargingStation;
   selectedConnector: Connector;
   selectedUser: User;
+  sessionContext: UserSessionContext;
   selectedTag: Tag;
   expiryDate: Date;
   selectedParentTag?: Tag;
@@ -77,7 +78,9 @@ export default class ReserveNow extends BaseScreen<Props, State> {
       reservationID: null,
       refreshing: false,
       isAdmin: false,
-      isSiteAdmin: false
+      isSiteAdmin: false,
+      sessionContext: null,
+      sessionContextLoading: true
     };
   }
 
@@ -98,14 +101,17 @@ export default class ReserveNow extends BaseScreen<Props, State> {
       role: currentUserToken.role,
       email: currentUserToken.email
     } as User;
-    this.setState({
-      selectedUser: this.user ?? currentUser,
-      selectedTag: this.tag,
-      selectedChargingStation: this.chargingStation,
-      selectedConnector: this.connector,
-      expiryDate: this.expiryDate,
-      reservationID: Utils.generateRandomReservationID()
-    });
+    this.setState(
+      {
+        selectedUser: this.user ?? currentUser,
+        selectedTag: this.tag ?? this.state.selectedTag,
+        selectedChargingStation: this.chargingStation,
+        selectedConnector: this.connector,
+        expiryDate: this.expiryDate,
+        reservationID: Utils.generateRandomReservationID()
+      },
+      async () => await this.loadUserSessionContext()
+    );
   }
 
   public componentWillUnmount(): void {
@@ -119,7 +125,6 @@ export default class ReserveNow extends BaseScreen<Props, State> {
     const commonColors = Utils.getCurrentCommonColor();
     const style = computeStyleSheet();
     const formStyle = computeFormStyleSheet();
-    const listItemCommonStyles = computeListItemCommonStyle();
     return (
       <SafeAreaView edges={['bottom']} style={style.container}>
         <HeaderComponent
@@ -160,10 +165,7 @@ export default class ReserveNow extends BaseScreen<Props, State> {
                   onItemsSelected={this.onUserSelected.bind(this)}
                   navigation={navigation}
                   selectionMode={ItemSelectionMode.SINGLE}>
-                  <Users
-                    filters={{ issuer: true }}
-                    navigation={navigation}
-                  />
+                  <Users filters={{ issuer: true }} navigation={navigation} />
                 </ModalSelect>
               )}
             />
@@ -329,20 +331,6 @@ export default class ReserveNow extends BaseScreen<Props, State> {
     );
   }
 
-  private renderCar(style: any, car: Car) {
-    return (
-      <SelectDropdown
-        disabled={true}
-        data={[]}
-        defaultValue={null}
-        renderCustomizedButtonChild={() => <CarComponent car={car} navigation={null} />}
-        buttonStyle={style.selectField}
-        buttonTextStyle={style.selectFieldText}
-        renderDropdownIcon={() => <Icon size={scale(25)} as={MaterialIcons} style={style.dropdownIcon} name={'arrow-drop-down'} />}
-      />
-    );
-  }
-
   private renderCarPlaceholder(style: any) {
     const listItemCommonStyle = computeListItemCommonStyle();
     return (
@@ -406,7 +394,8 @@ export default class ReserveNow extends BaseScreen<Props, State> {
       this.setState({
         selectedCar,
         selectedTag,
-        sessionContextLoading: false
+        sessionContextLoading: false,
+        sessionContext: userSessionContext
       });
     });
   }

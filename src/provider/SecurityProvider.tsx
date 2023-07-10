@@ -1,3 +1,4 @@
+import Reservation from '../types/Reservation';
 import { Action, Entity, Role } from '../types/Authorization';
 import SiteArea from '../types/SiteArea';
 import { TenantComponents } from '../types/Tenant';
@@ -67,6 +68,10 @@ export default class SecurityProvider {
 
   public isComponentReservationActive(): boolean {
     return this.isComponentActive(TenantComponents.RESERVATION);
+  }
+
+  public isComponentSmartCharging(): boolean {
+    return this.isComponentActive(TenantComponents.SMART_CHARGING);
   }
 
   public isComponentActive(componentName: string): boolean {
@@ -143,5 +148,31 @@ export default class SecurityProvider {
 
   public canListReservations(): boolean {
     return this.canAccess(Entity.RESERVATION, Action.LIST);
+  }
+
+  public canReserveNow(siteArea: SiteArea): boolean {
+    if (this.canAccess(Entity.CHARGING_STATION, Action.RESERVE_NOW)) {
+      if (this.isComponentActive(TenantComponents.ORGANIZATION)) {
+        if (!siteArea) {
+          return false;
+        }
+        return !siteArea.accessControl || this.isSiteAdmin(siteArea.siteID) || this.loggedUser.sites.includes(siteArea.siteID);
+      }
+      return true;
+    }
+    return false;
+  }
+
+  public canCancelReservation(reservation: Reservation): boolean {
+    if (this.canAccess(Entity.CHARGING_STATION, Action.CANCEL_RESERVATION)) {
+      if (this.isComponentActive(TenantComponents.ORGANIZATION)) {
+        if (this.loggedUser.tagIDs.includes(reservation.idTag)) {
+          return true;
+        }
+        // return !siteArea.accessControl || this.isSiteAdmin(siteArea.siteID) || this.loggedUser.sites.includes(siteArea.siteID);
+      }
+      return this.isAdmin();
+    }
+    return false;
   }
 }

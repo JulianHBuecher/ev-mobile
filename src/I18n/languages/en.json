@@ -393,6 +393,7 @@
     "title": "Charging Stations",
     "heartBeat": "Heartbeat",
     "chargers": "Charging Station(s)",
+    "charger": "Charging Station",
     "noOCPPParameters": "No OCPP parameter",
     "noChargerParameters": "No Charging Station parameter",
     "chargerConfigurationUnexpectedError": "Cannot read the configuration of the charging station",
@@ -418,7 +419,10 @@
     "ocpp": "OCPP",
     "actions": "Actions",
     "noSession": "No Session",
-    "noSessionMessage": "No session has been done on that connector"
+    "noSessionMessage": "No session has been done on that connector",
+    "noChargerMessageTitle": "No Charging Station has been selected",
+    "selectCharger": "Select Charging Station",
+    "selectChargers": "Select Charging Station(s)"
   },
   "connector": {
     "occupied": "Occupied",

@@ -3,8 +3,8 @@ import { Platform, StyleSheet } from 'react-native';
 import ResponsiveStylesSheet from 'react-native-responsive-stylesheet';
 import { moderateScale, ScaledSheet } from 'react-native-size-matters';
 
-import Utils from '../../../../utils/Utils';
-import { PLATFORM } from '../../../../theme/variables/commonColor';
+import Utils from '../../utils/Utils';
+import { PLATFORM } from '../../theme/variables/commonColor';
 
 export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
   const commonColor = Utils.getCurrentCommonColor();
@@ -44,20 +44,6 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
       alignItems: 'center',
       justifyContent: 'center'
     },
-    noTagContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      borderColor: commonColor.dangerLight,
-      borderTopWidth: 0.8,
-      borderLeftWidth: 0.8,
-      borderRightWidth: 0.8,
-      borderBottomWidth: 0.8
-    },
-    noTagIcon: {
-      color: commonColor.dangerLight,
-      fontSize: '50@s',
-      marginHorizontal: '10@s'
-    },
     column: {
       flexDirection: 'column',
       flex: 1
@@ -84,6 +70,20 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
       fontSize: '15@s',
       color: commonColor.brandPrimaryLight,
       marginRight: '5@s'
+    },
+    noTagContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderColor: commonColor.dangerLight,
+      borderTopWidth: 0.8,
+      borderLeftWidth: 0.8,
+      borderRightWidth: 0.8,
+      borderBottomWidth: 0.8
+    },
+    noTagIcon: {
+      color: commonColor.dangerLight,
+      fontSize: '50@s',
+      marginHorizontal: '10@s'
     },
     noItemContainer: {
       minHeight: '90@s',
@@ -186,6 +186,10 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
       backgroundColor: commonColor.textColor,
       marginLeft: 0
     },
+    carTypeContainer: {
+      width: '100%',
+      marginVertical: '10@s'
+    },
     radioButton: {
       marginRight: '15@s',
       borderColor: commonColor.textColor
@@ -197,27 +201,6 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
     },
     paddedInputTextContainer: {},
     dropdownIcon: {
-      color: commonColor.textColor
-    },
-    expiryDateContainer: {
-      width: '100%',
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginVertical: '10@s'
-    },
-    expiryDateInputContainer: {
-      flexDirection: 'row',
-      width: '95%',
-      alignItems: 'center',
-      padding: '5@s'
-    },
-    expiryDateText: {
-      fontSize: '14@s',
-      color: commonColor.textColor,
-      marginStart: '10@s'
-    },
-    dateIcon: {
       color: commonColor.textColor
     }
   });

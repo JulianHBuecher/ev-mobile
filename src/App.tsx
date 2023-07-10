@@ -650,7 +650,7 @@ function ReservationsNavigator(props: BaseProps) {
   return (
     <ReservationsStack.Navigator initialRouteName="Reservations" screenOptions={{ headerShown: false }}>
       <ReservationsStack.Screen name="Reservations" component={Reservations} initialParams={props?.route?.params?.params} />
-      <ReservationsStack.Screen name={'AddReservation'} component={AddReservation} initialParams={props?.route?.params?.params} />
+      <ReservationsStack.Screen name="AddReservation" component={AddReservation} initialParams={props?.route?.params?.params} />
       <ReservationsStack.Screen
         name="ReservationDetailsTabs"
         component={ReservationDetailsTabNavigator}

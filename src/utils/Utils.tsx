@@ -960,6 +960,28 @@ export default class Utils {
     }
   };
 
+  public static buildConnectorTypeStyle(type: string) {
+    const commonColors = Utils.getCurrentCommonColor();
+    switch (type) {
+      case ConnectorType.TYPE_2:
+        return { backgroundColor: commonColors.primary };
+      case ConnectorType.COMBO_CCS:
+        return { backgroundColor: commonColors.yellow };
+      case ConnectorType.CHADEMO:
+        return { backgroundColor: commonColors.purple };
+      case ConnectorType.DOMESTIC:
+        return { backgroundColor: commonColors.amber };
+      case ConnectorType.TYPE_1_CCS:
+        return { backgroundColor: commonColors.info };
+      case ConnectorType.TYPE_1:
+        return { backgroundColor: commonColors.warning };
+      case ConnectorType.TYPE_3C:
+        return { backgroundColor: commonColors.brandSuccessLight };
+      default:
+        return { backgroundColor: commonColors.disabled };
+    }
+  }
+
   public static translateUserStatus(status: string): string {
     switch (status) {
       case UserStatus.ACTIVE:
@@ -1035,7 +1057,7 @@ export default class Utils {
       case ReservationStatus.IN_PROGRESS:
         return <Icon size={scale(size)} as={MaterialIcons} name="sync" style={[style.primary]} />;
       case ReservationStatus.SCHEDULED:
-        return <Icon size={scale(size)} as={MaterialIcons} name="event_upcoming" style={[style.info]} />;
+        return <Icon size={scale(size)} as={MaterialIcons} name="schedule" style={[style.info]} />;
     }
   }
 

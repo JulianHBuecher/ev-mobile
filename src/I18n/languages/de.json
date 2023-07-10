@@ -393,6 +393,7 @@
     "title": "Ladestationen",
     "heartBeat": "Herzschlag",
     "chargers": "Ladestation(en)",
+    "charger": "Ladestation",
     "noOCPPParameters": "Kein OCPP Parameter",
     "noChargerParameters": "Kein Ladestationen Parameter",
     "chargerConfigurationUnexpectedError": "Einstellungen der Ladestation wurden nicht erkannt",
@@ -418,7 +419,10 @@
     "ocpp": "OCPP",
     "actions": "Aktionen",
     "noSession": "Kein Ladevorgang",
-    "noSessionMessage": "An diesem Ladepunkt wurde kein Ladevorgang durchgeführt"
+    "noSessionMessage": "An diesem Ladepunkt wurde kein Ladevorgang durchgeführt",
+    "noChargerMessageTitle": "Es wurde keine Ladestation ausgewählt",
+    "selectCharger": "Ladestation auswählen",
+    "selectChargers": "Ladestationen auswählen"
   },
   "connector": {
     "occupied": "Besetzt",

@@ -1,53 +1,57 @@
-import { default as I18n } from 'i18n-js';
-import { Icon, Spinner } from 'native-base';
+import I18n from 'i18n-js';
+import { Icon, View, Spinner } from 'native-base';
 import React from 'react';
-import { TouchableOpacity, View } from 'react-native';
-
 import HeaderComponent from '../../../components/header/HeaderComponent';
 import ItemsList, { ItemSelectionMode } from '../../../components/list/ItemsList';
-import SimpleSearchComponent from '../../../components/search/simple/SimpleSearchComponent';
-import UserComponent from '../../../components/user/UserComponent';
+import computeListItemCommonStyles from '../../../components/list/ListItemCommonStyle';
+import SelectableList, { SelectableProps, SelectableState } from '../../../screens/base-screen/SelectableList';
+import ChargingStation from '../../../types/ChargingStation';
 import { DataResult } from '../../../types/DataResult';
-import User from '../../../types/User';
 import Constants from '../../../utils/Constants';
 import Utils from '../../../utils/Utils';
-import computeStyleSheet from './UsersStyle';
-import SelectableList, { SelectableProps, SelectableState } from '../../base-screen/SelectableList';
-import computeListItemCommonStyles from '../../../components/list/ListItemCommonStyle';
-import UsersFilters, { UsersFiltersDef } from './UsersFilters';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import computeStyleSheet from './ReservableChargingStationsStyles';
+import ChargingStationsFilters, { ChargingStationsFiltersDef } from './ChargingStationsFilters';
+import SimpleSearchComponent from '../../../components/search/simple/SimpleSearchComponent';
+import { TouchableOpacity } from 'react-native';
 import { scale } from 'react-native-size-matters';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import ReservableChargingStationComponent from '../../../components/charging-station/ReservableChargingStationComponent';
 
-export interface Props extends SelectableProps<User> {
-  filters?: UsersFiltersDef;
+export interface ReservableChargingStationsFiltersDef {
+  fromDate?: Date;
+  toDate?: Date;
+  issuer?: boolean;
+  WithSite?: boolean;
+  WithSiteArea?: boolean;
 }
 
-export interface State extends SelectableState<User> {
-  users?: User[];
+export interface Props extends SelectableProps<ChargingStation> {
+  filters?: ReservableChargingStationsFiltersDef;
+}
+
+export interface State extends SelectableState<ChargingStation> {
+  chargingStations?: ChargingStation[];
   skip?: number;
   limit?: number;
   refreshing?: boolean;
   loading?: boolean;
-  filters?: UsersFiltersDef;
+  filters?: ReservableChargingStationsFiltersDef;
 }
 
-export default class Users extends SelectableList<User> {
-  public static defaultProps = {
-    selectionMode: ItemSelectionMode.NONE,
-    isModal: false
-  };
+export default class ReservableChargingStations extends SelectableList<ChargingStation> {
+  public static defaultProps: { selectionMode: ItemSelectionMode.NONE; isModal: false };
   public state: State;
   public props: Props;
   private searchText: string;
 
   public constructor(props: Props) {
     super(props);
-    this.singleItemTitle = I18n.t('users.user');
-    this.multiItemsTitle = I18n.t('users.users');
-    this.selectMultipleTitle = 'users.selectUsers';
-    this.selectSingleTitle = 'users.selectUser';
+    this.singleItemTitle = I18n.t('chargers.charger');
+    this.multiItemsTitle = I18n.t('chargers.chargers');
+    this.selectMultipleTitle = 'chargers.selectChargers';
+    this.selectSingleTitle = 'chargers.selectCharger';
     this.state = {
-      users: [],
+      chargingStations: [],
       skip: 0,
       limit: Constants.PAGING_SIZE,
       count: 0,
@@ -57,27 +61,32 @@ export default class Users extends SelectableList<User> {
     };
   }
 
-  public async getUsers(searchText: string, skip: number, limit: number): Promise<DataResult<User>> {
+  public async getReservableChargingStations(searchText: string, skip: number, limit: number): Promise<DataResult<ChargingStation>> {
     try {
       const issuer = this.props?.filters?.hasOwnProperty('issuer') ? this.props.filters.issuer : !this.state.filters?.issuer;
       const params = {
         Search: searchText,
-        Issuer: issuer
+        Issuer: issuer,
+        WithSite: this.props?.filters?.WithSite,
+        WithSiteArea: this.props?.filters?.WithSiteArea,
+        FromDate: this.props?.filters?.fromDate,
+        ToDate: this.props?.filters?.toDate
       };
-      const users = await this.centralServerProvider.getUsers(params, { skip, limit }, ['name']);
-      // Get total number of records
-      if (users?.count === -1) {
-        const usersNbrRecordsOnly = await this.centralServerProvider.getUsers(params, Constants.ONLY_RECORD_COUNT);
-        users.count = usersNbrRecordsOnly?.count;
+      const chargingStations = await this.centralServerProvider.getReservableChargingStations(params, { skip, limit }, ['id']);
+      if (chargingStations?.count === -1) {
+        const chargingStationsNbrsRecordsOnly = await this.centralServerProvider.getReservableChargingStations(
+          params,
+          Constants.ONLY_RECORD_COUNT
+        );
+        chargingStations.count = chargingStationsNbrsRecordsOnly?.count;
       }
-      return users;
+      return chargingStations;
     } catch (error) {
-      // Check if HTTP?
       if (!error.request) {
         await Utils.handleHttpUnexpectedError(
           this.centralServerProvider,
           error,
-          'users.userUnexpectedError',
+          'chargers.chargerUnexpectedError',
           this.props.navigation,
           this.refresh.bind(this)
         );
@@ -91,10 +100,10 @@ export default class Users extends SelectableList<User> {
     // No reached the end?
     if (skip + limit < count || count === -1) {
       // No: get next sites
-      const users = await this.getUsers(this.searchText, skip + Constants.PAGING_SIZE, limit);
+      const chargingStations = await this.getReservableChargingStations(this.searchText, skip + Constants.PAGING_SIZE, limit);
       // Add sites
       this.setState((prevState) => ({
-        users: users ? [...prevState.users, ...users.result] : prevState.users,
+        chargingStations: chargingStations ? [...prevState.chargingStations, ...chargingStations.result] : prevState.chargingStations,
         skip: prevState.skip + Constants.PAGING_SIZE,
         refreshing: false
       }));
@@ -110,20 +119,22 @@ export default class Users extends SelectableList<User> {
 
   public async refresh(showSpinner = false): Promise<void> {
     if (this.isMounted()) {
-      const newState = showSpinner ? { ...(Utils.isEmptyArray(this.state.users) ? { loading: true } : { refreshing: true }) } : this.state;
+      const newState = showSpinner
+        ? { ...(Utils.isEmptyArray(this.state.chargingStations) ? { loading: true } : { refreshing: true }) }
+        : this.state;
       this.setState(newState, async () => {
         const { skip, limit } = this.state;
         const { isModal, onContentUpdated } = this.props;
         // Refresh All
-        const users = await this.getUsers(this.searchText, 0, skip + limit);
-        const usersResult = users ? users.result : [];
+        const chargingStations = await this.getReservableChargingStations(this.searchText, 0, skip + limit);
+        const chargingStationsResult = chargingStations ? chargingStations.result : [];
         // Set
         this.setState(
           {
             loading: false,
             refreshing: false,
-            users: usersResult,
-            count: users?.count ?? 0
+            chargingStations: chargingStationsResult,
+            count: chargingStations?.count ?? 0
           },
           isModal ? () => onContentUpdated() : () => null
         );
@@ -139,7 +150,7 @@ export default class Users extends SelectableList<User> {
   public render(): React.ReactElement {
     const style = computeStyleSheet();
     const listItemCommonStyles = computeListItemCommonStyles();
-    const { users, count, skip, limit, refreshing, loading } = this.state;
+    const { chargingStations, count, skip, limit, refreshing, loading } = this.state;
     const { navigation, isModal, selectionMode } = this.props;
     return (
       <View style={style.container}>
@@ -159,27 +170,27 @@ export default class Users extends SelectableList<User> {
           <Spinner size={scale(30)} style={style.spinner} color="grey" />
         ) : (
           <View style={style.content}>
-            <ItemsList<User>
+            <ItemsList<ChargingStation>
               ref={this.itemsListRef}
               selectionMode={selectionMode}
               onSelect={this.onItemsSelected.bind(this)}
-              data={users}
+              data={chargingStations}
               navigation={navigation}
               count={count}
               limit={limit}
               skip={skip}
-              renderItem={(item: User, selected: boolean) => (
-                <UserComponent
-                  containerStyle={[style.userComponentContainer, selected && listItemCommonStyles.outlinedSelected]}
-                  user={item}
+              renderItem={(item: ChargingStation, selected: boolean) => (
+                <ReservableChargingStationComponent
+                  chargingStation={item}
+                  containerStyle={[style.chargingStationComponentContainer, selected && listItemCommonStyles.outlinedSelected]}
                   selected={selected}
-                  navigation={this.props.navigation}
+                  navigation={navigation}
                 />
               )}
               refreshing={refreshing}
-              manualRefresh={isModal ? null : this.manualRefresh.bind(this)}
+              manualRefresh={this.manualRefresh.bind(this)}
               onEndReached={this.onEndScroll}
-              emptyTitle={I18n.t('users.noUsers')}
+              emptyTitle={I18n.t('chargers.noChargers')}
             />
           </View>
         )}
@@ -187,7 +198,7 @@ export default class Users extends SelectableList<User> {
     );
   }
 
-  private onFiltersChanged(newFilters: UsersFiltersDef): void {
+  private onFiltersChanged(newFilters: ChargingStationsFilters): void {
     this.setState({ filters: newFilters }, async () => this.refresh(true));
   }
 
@@ -199,9 +210,9 @@ export default class Users extends SelectableList<User> {
     return (
       <View style={style.filtersContainer}>
         {!isModal && (
-          <UsersFilters
-            onFilterChanged={(newFilters: UsersFiltersDef) => this.onFiltersChanged(newFilters)}
-            ref={(usersFilters: UsersFilters) => this.setScreenFilters(usersFilters, false)}
+          <ChargingStationsFilters
+            onFilterChanged={(newFilters: ChargingStationsFiltersDef) => this.onFiltersChanged(newFilters)}
+            ref={(chargingStationsFilters: ChargingStationsFilters) => this.setScreenFilters(chargingStationsFilters, false)}
           />
         )}
         <SimpleSearchComponent

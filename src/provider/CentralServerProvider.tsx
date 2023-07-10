@@ -36,7 +36,7 @@ import SecuredStorage from '../utils/SecuredStorage';
 import Utils from '../utils/Utils';
 import SecurityProvider from './SecurityProvider';
 import { getApplicationName, getBundleId, getVersion } from 'react-native-device-info';
-import Reservation from '../types/Reservation';
+import Reservation, { ReservationType } from '../types/Reservation';
 
 export default class CentralServerProvider {
   private axiosInstance: AxiosInstance;
@@ -1152,6 +1152,26 @@ export default class CentralServerProvider {
       body,
       {
         headers: this.buildSecuredHeaders()
+      }
+    );
+    return response?.data;
+  }
+
+  public async getReservableChargingStations(
+    params = {},
+    paging: PagingParams = Constants.DEFAULT_PAGING,
+    sorting: string[] = []
+  ): Promise<DataResult<ChargingStation>> {
+    this.debugMethod('getReservableChargingStations');
+    // Build Paging
+    this.buildPaging(paging, params);
+    // Build Sorting
+    this.buildSorting(sorting, params);
+    const response = await this.axiosInstance.get<DataResult<ChargingStation>>(
+      this.buildRestEndpointUrl(RESTServerRoute.REST_CHARGING_STATIONS_RESERVATION_AVAILABILITY),
+      {
+        headers: this.buildSecuredHeaders(),
+        params
       }
     );
     return response?.data;
