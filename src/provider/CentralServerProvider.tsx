@@ -53,6 +53,7 @@ export default class CentralServerProvider {
   private tenant: TenantConnection = null;
   private currency: string = null;
   private siteImagesCache: Map<string, string> = new Map<string, string>();
+  private siteAreaImagesCache: Map<string, string> = new Map<string, string>();
   private tenantLogosCache: Map<string, string> = new Map<string, string>();
   private autoLoginDisabled = false;
 
@@ -911,6 +912,30 @@ export default class CentralServerProvider {
       }
     }
     return foundSiteImage;
+  }
+
+  public async getSiteAreaImage(id: string): Promise<string> {
+    this.debugMethod('getSiteAreaImage');
+    // Check cache
+    let foundSiteAreaImage = this.siteAreaImagesCache.get(id);
+    if (!foundSiteAreaImage) {
+      // Call backend
+      const result = await this.axiosInstance.get<any>(this.buildUtilRestEndpointUrl(RESTServerRoute.REST_SITE_AREA_IMAGE, { id }), {
+        headers: this.buildHeaders(),
+        responseType: 'arraybuffer',
+        params: {
+          TenantID: this.decodedToken?.tenantID
+        }
+      });
+      if (result.data) {
+        const base64Image = Buffer.from(result.data).toString('base64');
+        if (base64Image) {
+          foundSiteAreaImage = 'data:' + result.headers['content-type'] + ';base64,' + base64Image;
+          this.siteAreaImagesCache.set(id, foundSiteAreaImage);
+        }
+      }
+    }
+    return foundSiteAreaImage;
   }
 
   public async getTransactionConsumption(transactionId: number): Promise<Transaction> {

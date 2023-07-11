@@ -4,7 +4,6 @@ import { Icon } from 'native-base';
 import I18n from 'i18n-js';
 import { Text, TouchableOpacity, View, ViewStyle } from 'react-native';
 import I18nManager from '../../I18n/I18nManager';
-import BaseProps from '../../types/BaseProps';
 import computeStyleSheet from './DateTimePickerComponentStyles';
 import Utils from '../../utils/Utils';
 import { scale } from 'react-native-size-matters';
@@ -54,41 +53,37 @@ export default class DateTimePickerComponent extends React.Component<Props, Stat
     const commonColors = Utils.getCurrentCommonColor();
     return (
       <View style={[...(containerStyle || [])]}>
-        <View style={style.dateTimeContent}>
-          <TouchableOpacity style={style.dateTimeInputContainer} onPress={() => this.setState({ openDateTimePicker: true })}>
-            <View style={style.avatarContainer}>
-              <Icon size={scale(28)} style={style.dateIcon} as={Foundation} name={'calendar'} />
-            </View>
-            <View style={style.dateTimeContainer}>
-              <Text numberOfLines={1} ellipsizeMode={'tail'} style={[style.text, style.title]}>
-                {I18n.t(title)}
-              </Text>
-              <Text numberOfLines={1} ellipsizeMode={'tail'} style={style.text}>
-                {I18nManager.formatDateTime(dateTime, { dateStyle: 'medium' })}
-              </Text>
-              <View style={style.bottomLine}>
-                <Text numberOfLines={1} ellipsizeMode={'tail'} style={style.text}>
-                  {I18nManager.formatDateTime(dateTime, { timeStyle: 'medium' })}
-                </Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-          <DateTimePicker
-            isVisible={this.state.openDateTimePicker}
-            mode={'datetime'}
-            locale={locale}
-            is24Hour={is24Hour}
-            cancelTextIOS={I18n.t('general.cancel')}
-            confirmTextIOS={I18n.t('general.confirm')}
-            buttonTextColorIOS={commonColors.textColor}
-            minimumDate={minimumDateTime}
-            maximumDate={maximumDateTime}
-            date={dateTime}
-            minuteInterval={5}
-            onConfirm={(newDateTime: Date) => this.onConfirm(newDateTime)}
-            onCancel={() => this.setState({ openDateTimePicker: false })}
-          />
-        </View>
+        <TouchableOpacity style={style.dateTimeContainer} onPress={() => this.setState({ openDateTimePicker: true })}>
+          <View style={style.calendarIconContainer}>
+            <Icon size={scale(28)} style={style.dateIcon} as={Foundation} name={'calendar'} />
+          </View>
+          <View style={style.contentContainer}>
+            <Text numberOfLines={1} ellipsizeMode={'tail'} style={[style.text, style.title]}>
+              {I18n.t(title)}
+            </Text>
+            <Text numberOfLines={1} style={style.text}>
+              {I18nManager.formatDateTime(dateTime, { dateStyle: 'medium' })}
+            </Text>
+            <Text numberOfLines={1} style={style.text}>
+              {I18nManager.formatDateTime(dateTime, { timeStyle: 'medium' })}
+            </Text>
+          </View>
+        </TouchableOpacity>
+        <DateTimePicker
+          isVisible={this.state.openDateTimePicker}
+          mode={'datetime'}
+          locale={locale}
+          is24Hour={is24Hour}
+          cancelTextIOS={I18n.t('general.cancel')}
+          confirmTextIOS={I18n.t('general.confirm')}
+          buttonTextColorIOS={commonColors.textColor}
+          minimumDate={minimumDateTime}
+          maximumDate={maximumDateTime}
+          date={dateTime}
+          minuteInterval={5}
+          onConfirm={(newDateTime: Date) => this.onConfirm(newDateTime)}
+          onCancel={() => this.setState({ openDateTimePicker: false })}
+        />
       </View>
     );
   }

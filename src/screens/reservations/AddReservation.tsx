@@ -24,7 +24,7 @@ import Users from '../../screens/users/list/Users';
 import { RestResponse } from '../../types/ActionResponse';
 import BaseProps from '../../types/BaseProps';
 import Car from '../../types/Car';
-import ChargingStation, { Connector } from '../../types/ChargingStation';
+import ChargingStation, { ChargePointStatus, Connector } from '../../types/ChargingStation';
 import Reservation, { ReservationType } from '../../types/Reservation';
 import Tag from '../../types/Tag';
 import { UserSessionContext } from '../../types/Transaction';
@@ -35,7 +35,6 @@ import Utils from '../../utils/Utils';
 import computeStyleSheet from './AddReservationStyles';
 import Tags from '../../screens/tags/Tags';
 import Cars from '../../screens/cars/Cars';
-import computeListItemCommonStyle from '../../components/list/ListItemCommonStyle';
 import ReservableChargingStations from '../../screens/charging-stations/list/ReservableChargingStations';
 import moment from 'moment';
 import ReservableChargingStationComponent from '../../components/charging-station/ReservableChargingStationComponent';
@@ -157,10 +156,13 @@ export default class AddReservation extends BaseScreen<Props, State> {
               inputStyle={formStyle.inputText}
               inputContainerStyle={[formStyle.inputTextContainer, expiryDate && { paddingLeft: 0 }]}
               labelStyle={style.inputLabel}
-              renderErrorMessage={false}
+              renderErrorMessage={!this.checkDate(expiryDate)}
+              errorMessage={!this.checkDate(expiryDate) ? I18n.t('reservations.invalidDate') : null}
               InputComponent={() =>
-                this.renderDatePicker(style, expiryDate, 'reservations.expiryDate', (newExpiryDate: Date) =>
-                  this.setState({ expiryDate: newExpiryDate })
+                this.renderDatePicker(
+                  'reservations.expiryDate',
+                  (newExpiryDate: Date) => this.setState({ expiryDate: newExpiryDate }),
+                  expiryDate
                 )
               }
             />
@@ -171,11 +173,10 @@ export default class AddReservation extends BaseScreen<Props, State> {
               inputStyle={formStyle.inputText}
               inputContainerStyle={[formStyle.inputTextContainer, fromDate && { paddingLeft: 0 }]}
               labelStyle={style.inputLabel}
-              renderErrorMessage={false}
+              renderErrorMessage={!this.checkDate(fromDate)}
+              errorMessage={!this.checkDate(fromDate) ? I18n.t('reservations.invalidDate') : null}
               InputComponent={() =>
-                this.renderDatePicker(style, fromDate, 'reservations.fromDate', (newFromDate: Date) =>
-                  this.setState({ fromDate: newFromDate })
-                )
+                this.renderDatePicker('reservations.fromDate', (newFromDate: Date) => this.setState({ fromDate: newFromDate }), fromDate)
               }
             />
           )}
@@ -185,9 +186,10 @@ export default class AddReservation extends BaseScreen<Props, State> {
               inputStyle={formStyle.inputText}
               inputContainerStyle={[formStyle.inputTextContainer, toDate && { paddingLeft: 0 }]}
               labelStyle={style.inputLabel}
-              renderErrorMessage={false}
+              renderErrorMessage={!this.checkDateRange(fromDate, toDate)}
+              errorMessage={!this.checkDateRange(fromDate, toDate) ? I18n.t('reservations.invalidDateRange') : null}
               InputComponent={() =>
-                this.renderDatePicker(style, toDate, 'reservations.toDate', (newToDate: Date) => this.setState({ toDate: newToDate }))
+                this.renderDatePicker('reservations.toDate', (newToDate: Date) => this.setState({ toDate: newToDate }), toDate)
               }
             />
           )}
@@ -205,7 +207,7 @@ export default class AddReservation extends BaseScreen<Props, State> {
                 ref={this.chargingStationModalRef}
                 renderItemPlaceholder={() => this.renderChargingStationPlaceholder(style)}
                 renderItem={(chargingStation: ChargingStation) => this.renderChargingStation(style, chargingStation)}
-                onItemsSelected={(chargingStations: ChargingStation[]) => this.setState({ selectedChargingStation: chargingStations?.[0] })}
+                onItemsSelected={(chargingStations: ChargingStation[]) => this.onChargingStationSelected(chargingStations?.[0])}
                 navigation={navigation}
                 selectionMode={ItemSelectionMode.SINGLE}>
                 <ReservableChargingStations
@@ -224,8 +226,8 @@ export default class AddReservation extends BaseScreen<Props, State> {
           <Input
             containerStyle={formStyle.inputContainer}
             inputStyle={formStyle.inputText}
-            inputContainerStyle={[formStyle.inputTextContainer, selectedConnector && { paddingLeft: 0 }]}
-            labelStyle={style.inputLabel}
+            inputContainerStyle={[formStyle.inputTextContainer]}
+            labelStyle={[style.inputLabel, !selectedChargingStation && style.disabledInputLabel]}
             renderErrorMessage={false}
             InputComponent={() => (
               <SelectDropdown
@@ -233,7 +235,7 @@ export default class AddReservation extends BaseScreen<Props, State> {
                 defaultValue={selectedConnector}
                 statusBarTranslucent={true}
                 defaultButtonText={I18n.t('reservations.connectorId')}
-                data={selectedChargingStation?.connectors}
+                data={selectedChargingStation?.connectors.filter((connector) => connector.status === ChargePointStatus.AVAILABLE)}
                 buttonTextAfterSelection={(connector: Connector) => this.buildChargingStationConnectorName(connector)}
                 rowTextForSelection={(connector: Connector) => this.buildChargingStationConnectorName(connector)}
                 buttonStyle={{ ...style.selectField, ...(!selectedConnector ? style.selectFieldDisabled : {}) }}
@@ -316,7 +318,7 @@ export default class AddReservation extends BaseScreen<Props, State> {
               )}
             />
           )}
-          <View style={style.carTypeContainer}>
+          <View style={style.reservationTypeContainer}>
             <CheckBox
               containerStyle={formStyle.checkboxContainer}
               textStyle={formStyle.checkboxText}
@@ -420,9 +422,15 @@ export default class AddReservation extends BaseScreen<Props, State> {
     }
   }
 
-  public renderDatePicker(style: any, date: Date, title: string, onDateTimeChanged: (newDate: Date) => Promise<void> | void) {
-    const minimumDate = new Date();
-    const maximumDate = new Date(new Date().getTime() + Utils.generateDateWithDelay(0, 2, 0, 0).getTime());
+  public renderDatePicker(
+    title: string,
+    onDateTimeChanged: (newDate: Date) => Promise<void> | void,
+    date: Date,
+    minDate?: Date,
+    maxDate?: Date
+  ) {
+    const minimumDate = minDate ?? moment().toDate();
+    const maximumDate = maxDate ?? moment().add(2, 'd').toDate();
     date = date ?? Utils.generateDateWithDelay(0, 1, 0, 0);
     const locale = this.currentUser?.locale;
     const is24Hour = I18nManager?.isLocale24Hour(locale);
@@ -562,6 +570,21 @@ export default class AddReservation extends BaseScreen<Props, State> {
     );
   }
 
+  private onChargingStationSelected(selectedChargingStation: ChargingStation) {
+    this.setState({ selectedChargingStation });
+    this.loadChargingStationConnector(selectedChargingStation);
+  }
+
+  private loadChargingStationConnector(selectedChargingStation: ChargingStation) {
+    let connector: Connector = null;
+    if (selectedChargingStation.connectors.length === 1 && selectedChargingStation.connectors[0].status === ChargePointStatus.AVAILABLE) {
+      connector = selectedChargingStation.connectors[0];
+    }
+    this.setState({
+      selectedConnector: connector
+    });
+  }
+
   private async loadUserSessionContext(): Promise<void> {
     const { selectedUser, selectedChargingStation, selectedConnector } = this.state;
     let { selectedCar, selectedTag } = this.state;
@@ -635,5 +658,23 @@ export default class AddReservation extends BaseScreen<Props, State> {
       connectorName += ` - ${connector.amperage} A`;
     }
     return connectorName;
+  }
+
+  private checkDate(date: Date): boolean {
+    const parsedDate = moment(date);
+    return !date || parsedDate.isValid();
+  }
+
+  private checkDateRange(minDate: Date, maxDate: Date) {
+    let valid = false;
+    const parsedMinDate = moment(minDate);
+    const parsedMaxDate = moment(maxDate);
+    if (parsedMinDate.isValid() || parsedMaxDate.isValid()) {
+      valid = true;
+    }
+    if (parsedMinDate.isAfter(parsedMaxDate) || parsedMaxDate.isBefore(parsedMinDate)) {
+      valid = false;
+    }
+    return valid;
   }
 }

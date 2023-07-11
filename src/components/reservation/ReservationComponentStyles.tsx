@@ -66,12 +66,6 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
       justifyContent: 'space-between',
       height: '100%'
     },
-    reservationDetailsContainer1: {
-      paddingTop: '5@s'
-    },
-    reservationDetailsContainer2: {
-      paddingBottom: '2@s'
-    },
     reservationDetailContainer: {
       marginTop: '3@s',
       flexDirection: 'column',

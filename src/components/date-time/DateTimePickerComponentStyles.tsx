@@ -8,30 +8,28 @@ import Utils from '../../utils/Utils';
 export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
   const commonColor = Utils.getCurrentCommonColor();
   const commonStyles = ScaledSheet.create({
-    dateTimeContent: {
-      width: '100%',
+    dateTimeContainer: {
       height: '90@s',
       justifyContent: 'space-between',
+      alignItems: 'center',
       flexDirection: 'row',
       margin: 0,
-      paddingLeft: 0,
-      paddingTop: 0,
-      paddingBottom: 0,
-      paddingRight: 0
+      padding: '5@s'
     },
-    avatarContainer: {
-      marginLeft: '15@s',
+    contentContainer: {
       height: '100%',
-      paddingRight: '15@s',
+      justifyContent: 'center',
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      paddingVertical: '5@s',
+      width: '100%'
+    },
+    calendarIconContainer: {
+      marginLeft: '20@s',
+      height: '100%',
+      paddingRight: '20@s',
       alignItems: 'center',
       justifyContent: 'center'
-    },
-    dateTimeContainer: {
-      flex: 1,
-      height: '100%',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      paddingRight: '5@s'
     },
     text: {
       color: commonColor.textColor,
@@ -46,12 +44,6 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
       flexDirection: 'row',
       alignItems: 'center',
       width: '100%'
-    },
-    dateTimeInputContainer: {
-      flexDirection: 'row',
-      width: '95%',
-      alignItems: 'center',
-      padding: '5@s'
     }
   });
   const portraitStyles = {};

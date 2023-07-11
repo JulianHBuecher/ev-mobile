@@ -34,63 +34,6 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
     carPlaceholderContainer: {
       backgroundColor: commonColor.listItemBackground
     },
-    noCarIcon: {
-      fontSize: '55@s',
-      color: commonColor.textColor,
-      marginHorizontal: '10@s'
-    },
-    noCarContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center'
-    },
-    column: {
-      flexDirection: 'column',
-      flex: 1
-    },
-    messageText: {
-      textAlign: 'left',
-      fontSize: '13@s',
-      color: commonColor.textColor
-    },
-    addItemContainer: {
-      flexDirection: 'row',
-      width: '100%',
-      justifyContent: 'flex-start',
-      alignItems: 'center'
-    },
-    linkText: {
-      color: commonColor.brandPrimaryLight,
-      alignItems: 'center'
-    },
-    linkLabel: {
-      flex: 1
-    },
-    plusSign: {
-      fontSize: '15@s',
-      color: commonColor.brandPrimaryLight,
-      marginRight: '5@s'
-    },
-    noTagContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      borderColor: commonColor.dangerLight,
-      borderTopWidth: 0.8,
-      borderLeftWidth: 0.8,
-      borderRightWidth: 0.8,
-      borderBottomWidth: 0.8
-    },
-    noTagIcon: {
-      color: commonColor.dangerLight,
-      fontSize: '50@s',
-      marginHorizontal: '10@s'
-    },
-    noItemContainer: {
-      minHeight: '90@s',
-      padding: '10@s',
-      marginBottom: '11@s',
-      justifyContent: 'flex-start'
-    },
     inputContainer: {
       borderBottomColor: commonColor.textColor,
       borderBottomWidth: 0.7,
@@ -186,7 +129,7 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
       backgroundColor: commonColor.textColor,
       marginLeft: 0
     },
-    carTypeContainer: {
+    reservationTypeContainer: {
       width: '100%',
       marginVertical: '10@s'
     },

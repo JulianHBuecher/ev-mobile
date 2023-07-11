@@ -1,6 +1,7 @@
 import CreatedUpdatedProps from './CreatedUpdatedProps';
 import { KeyValue } from './Global';
 import ListItem from './ListItem';
+import Site from './Site';
 import SiteArea from './SiteArea';
 import { InactivityStatus } from './Transaction';
 import User from './User';
@@ -13,6 +14,7 @@ export enum Voltage {
 export default interface ChargingStation extends CreatedUpdatedProps, ListItem {
   id: string;
   siteAreaID: string;
+  siteID: string;
   chargePointSerialNumber: string;
   chargePointModel: string;
   chargeBoxSerialNumber: string;
@@ -38,6 +40,7 @@ export default interface ChargingStation extends CreatedUpdatedProps, ListItem {
   connectors: Connector[];
   currentIPAddress?: string;
   siteArea?: SiteArea;
+  site?: Site;
   capabilities?: ChargingStationCapabilities;
   ocppStandardParameters?: KeyValue[];
   ocppVendorParameters?: KeyValue[];

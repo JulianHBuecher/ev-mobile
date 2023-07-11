@@ -615,6 +615,8 @@
     "reservationsUnexpectedError": "Cannot read reservations",
     "reservationDoesNotExist": "Reservation does not exist",
     "noReservations": "No reservations found",
+    "invalidDate": "Invalid date",
+    "invalidDateRange": "Invalid date range. End date is before start date",
     "statuses": {
       "reservation_done": "Done",
       "reservation_scheduled": "Scheduled",
@@ -659,14 +661,6 @@
       "details": "",
       "success": "The reservation '{{reservationID}}' has been saved successfully",
       "error": "Cannot change the reservation details, check the logs"
-    },
-    "delete": {
-      "title": "Delete Reservation",
-      "tooltips": "Delete Reservation",
-      "confirm": "Do you really want to delete the reservation '{{reservationID}}'?",
-      "details": "",
-      "success": "The reservation '{{reservationID}}' is successfully deleted",
-      "error": "An error occurred during the deletion of the reservation, check the logs"
     }
   }
 }

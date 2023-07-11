@@ -615,6 +615,8 @@
     "reservationsUnexpectedError": "Reservierungen können nicht gelesen werden",
     "reservationDoesNotExist": "Reservierungen konnte nicht gefunden werden",
     "noReservations": "Keine Reservierungen",
+    "invalidDate": "Ungültiges Datum",
+    "invalidDateRange": "Ungültige Zeitspanne",
     "statuses": {
       "reservation_done": "Abgeschlossen",
       "reservation_scheduled": "Eingeplant",
@@ -659,14 +661,6 @@
       "details": "",
       "success": "Die Reservierung '{{reservationID}}' wurde erfolgreich gespeichert",
       "error": "Die Reservierung kann nicht verändert werden, siehe Log-Nachrichten für Details"
-    },
-    "delete": {
-      "title": "Reservierung löschen",
-      "tooltips": "Reservierung löschen",
-      "confirm": "Sind Sie sich sicher, dass Sie die Reservierung '{{reservationID}}' löschen wollen?",
-      "details": "",
-      "success": "Die Reservierung '{{reservationID}}' wurde erfolgreich gelöscht",
-      "error": "Beim Löschen der Reservierung ist ein Fehler aufgetreten"
     }
   }
 }

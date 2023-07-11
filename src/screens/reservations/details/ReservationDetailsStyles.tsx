@@ -27,7 +27,7 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
     },
     backgroundImage: {
       width: '100%',
-      height: '125@s'
+      height: '150@s'
     },
     reservationContainer: {
       justifyContent: 'center',
@@ -148,6 +148,18 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
     disabled: {
       color: commonColor.disabled,
       borderColor: commonColor.buttonDisabledBg
+    },
+    connectorDetail: {
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '60@s',
+      color: commonColor.textColor
+    },
+    labelImage: {
+      color: commonColor.textColor,
+      paddingTop: '2@s',
+      fontSize: '10@s'
     }
   });
   const portraitStyles = {};
