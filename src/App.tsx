@@ -69,6 +69,7 @@ import Reservations from './screens/reservations/Reservations';
 import ReservationDetails from './screens/reservations/details/ReservationDetails';
 import ReserveNow from './screens/charging-stations/connector-details/reserve-now/ChargingStationConnectorReserveNow';
 import AddReservation from './screens/reservations/AddReservation';
+import EditReservation from './screens/reservations/EditReservation';
 
 // Init i18n
 I18nManager.initialize();
@@ -656,6 +657,7 @@ function ReservationsNavigator(props: BaseProps) {
         component={ReservationDetailsTabNavigator}
         initialParams={props?.route?.params?.params}
       />
+      <ReservationsStack.Screen name="EditReservation" component={EditReservation} initialParams={props?.route?.params?.params} />
     </ReservationsStack.Navigator>
   );
 }

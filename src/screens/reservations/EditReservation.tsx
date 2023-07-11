@@ -28,7 +28,7 @@ import ChargingStation, { ChargePointStatus, Connector } from '../../types/Charg
 import Reservation, { ReservationType } from '../../types/Reservation';
 import Tag from '../../types/Tag';
 import { UserSessionContext } from '../../types/Transaction';
-import User, { UserRole, UserStatus } from '../../types/User';
+import User from '../../types/User';
 import UserToken from '../../types/UserToken';
 import Message from '../../utils/Message';
 import Utils from '../../utils/Utils';
@@ -40,6 +40,7 @@ import moment from 'moment';
 import ReservableChargingStationComponent from '../../components/charging-station/ReservableChargingStationComponent';
 
 interface State {
+  reservation: Reservation;
   reservableChargingStations: ChargingStation[];
   selectedChargingStation: ChargingStation;
   selectedConnector: Connector;
@@ -61,9 +62,10 @@ interface State {
 
 export interface Props extends BaseProps {}
 
-export default class AddReservation extends BaseScreen<Props, State> {
+export default class EditReservation extends BaseScreen<Props, State> {
   public state: State;
   public props: Props;
+  private reservation: Reservation;
   private currentUser: UserToken;
   private carModalRef = React.createRef<ModalSelect<Car>>();
   private tagModalRef = React.createRef<ModalSelect<Tag>>();
@@ -72,6 +74,7 @@ export default class AddReservation extends BaseScreen<Props, State> {
   public constructor(props: Props) {
     super(props);
     this.state = {
+      reservation: null,
       reservationID: null,
       reservableChargingStations: null,
       selectedChargingStation: null,
@@ -95,20 +98,21 @@ export default class AddReservation extends BaseScreen<Props, State> {
     await super.componentDidMount();
     Orientation.lockToPortrait();
     this.currentUser = this.centralServerProvider.getUserInfo();
-    const currentUser = {
-      id: this.currentUser?.id,
-      firstName: this.currentUser?.firstName,
-      name: this.currentUser?.name,
-      status: UserStatus.ACTIVE,
-      role: this.currentUser.role,
-      email: this.currentUser.email
-    } as User;
+    this.reservation = Utils.getParamFromNavigation(this.props.route, 'reservation', null) as unknown as Reservation;
+    const selectedConnector = Utils.getConnectorFromID(this.reservation.chargingStation, this.reservation.connectorID);
     this.setState(
       {
-        type: ReservationType.RESERVE_NOW, // as default
-        selectedUser: currentUser.role === UserRole.ADMIN ? null : this.currentUser,
-        reservationID: Utils.generateRandomReservationID(),
-        expiryDate: Utils.generateDateWithDelay(0, 1, 0, 0)
+        reservation: this.reservation,
+        reservationID: this.reservation.id,
+        selectedChargingStation: this.reservation.chargingStation,
+        selectedConnector,
+        selectedUser: this.reservation.tag.user,
+        selectedTag: this.reservation.tag,
+        selectedCar: this.reservation.car,
+        expiryDate: moment(this.reservation.expiryDate).toDate(),
+        fromDate: moment(this.reservation.fromDate).toDate(),
+        toDate: moment(this.reservation.toDate).toDate(),
+        type: this.reservation.type
       },
       async () => await this.loadUserSessionContext()
     );
@@ -139,7 +143,7 @@ export default class AddReservation extends BaseScreen<Props, State> {
     return (
       <SafeAreaView edges={['bottom']} style={style.container}>
         <HeaderComponent
-          title={I18n.t('reservations.create.title')}
+          title={I18n.t('reservations.update.title')}
           navigation={navigation}
           backArrow={true}
           containerStyle={style.headerContainer}
@@ -235,7 +239,7 @@ export default class AddReservation extends BaseScreen<Props, State> {
                 defaultValue={selectedConnector}
                 statusBarTranslucent={true}
                 defaultButtonText={I18n.t('reservations.connectorId')}
-                data={selectedChargingStation?.connectors.filter((connector) => connector.status === ChargePointStatus.AVAILABLE)}
+                data={selectedChargingStation?.connectors}
                 buttonTextAfterSelection={(connector: Connector) => this.buildChargingStationConnectorName(connector)}
                 rowTextForSelection={(connector: Connector) => this.buildChargingStationConnectorName(connector)}
                 buttonStyle={{ ...style.selectField, ...(!selectedConnector ? style.selectFieldDisabled : {}) }}
@@ -353,7 +357,7 @@ export default class AddReservation extends BaseScreen<Props, State> {
             />
           </View>
           <Button
-            title={I18n.t('reservations.create.title')}
+            title={I18n.t('reservations.update.title')}
             titleStyle={formStyle.buttonTitle}
             disabled={!this.checkForm()}
             disabledStyle={formStyle.buttonDisabled}
@@ -361,14 +365,14 @@ export default class AddReservation extends BaseScreen<Props, State> {
             containerStyle={formStyle.buttonContainer}
             buttonStyle={formStyle.button}
             loadingProps={{ color: commonColors.light }}
-            onPress={() => void this.addReservation()}
+            onPress={() => void this.updateReservation()}
           />
         </KeyboardAwareScrollView>
       </SafeAreaView>
     );
   }
 
-  public async addReservation(): Promise<void> {
+  public async updateReservation(): Promise<void> {
     if (this.checkForm()) {
       const {
         reservationID,
@@ -389,20 +393,22 @@ export default class AddReservation extends BaseScreen<Props, State> {
           connectorID: selectedConnector.connectorId,
           idTag: (selectedTag?.id as string) ?? null,
           visualTagID: selectedTag.visualID,
-          fromDate: fromDate ?? new Date(),
+          fromDate: fromDate ?? moment().toDate(),
           toDate: toDate ?? expiryDate,
           expiryDate: toDate ?? expiryDate,
           carID: (selectedCar?.id as string) ?? null,
           parentIdTag: selectedParentTag?.visualID ?? null,
           type,
-          createdBy: { id: this.currentUser.id, name: this.currentUser.name, firstName: this.currentUser.firstName },
-          createdOn: new Date()
+          createdBy: this.reservation.createdBy,
+          createdOn: this.reservation.createdOn,
+          lastChangedBy: { id: this.currentUser.id, name: this.currentUser.name, firstName: this.currentUser.firstName },
+          lastChangedOn: moment().toDate()
         };
         // Create Reservation
-        const response = await this.centralServerProvider.createReservation(reservation);
+        const response = await this.centralServerProvider.updateReservation(reservation);
         if (response?.status === RestResponse.SUCCESS) {
           Message.showSuccess(
-            I18n.t('reservations.create.success', {
+            I18n.t('reservations.update.success', {
               reservationID
             })
           );
@@ -411,13 +417,13 @@ export default class AddReservation extends BaseScreen<Props, State> {
           return;
         } else {
           // Show message
-          Message.showError(I18n.t('reservations.create.error'));
+          Message.showError(I18n.t('reservations.update.error'));
         }
       } catch (error) {
         // Enable the button
         this.setState({ buttonDisabled: false });
         // Other common Error
-        await Utils.handleHttpUnexpectedError(this.centralServerProvider, error, 'reservations.create.error', this.props.navigation);
+        await Utils.handleHttpUnexpectedError(this.centralServerProvider, error, 'reservations.update.error', this.props.navigation);
       }
     }
   }

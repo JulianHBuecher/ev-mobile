@@ -1163,6 +1163,18 @@ export default class CentralServerProvider {
     return response?.data;
   }
 
+  public async deleteReservation(reservation: Reservation): Promise<ActionResponse> {
+    this.debugMethod('deleteReservation');
+    // Execute
+    const response = await this.axiosInstance.delete<any>(
+      this.buildRestEndpointUrl(RESTServerRoute.REST_RESERVATION, { id: reservation.id }),
+      {
+        headers: this.buildSecuredHeaders()
+      }
+    );
+    return response?.data;
+  }
+
   public async cancelReservation(reservation: Reservation): Promise<ActionResponse> {
     this.debugMethod('updateReservation');
     const body = {

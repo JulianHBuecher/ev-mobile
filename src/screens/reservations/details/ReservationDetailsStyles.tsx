@@ -1,7 +1,7 @@
 import deepmerge from 'deepmerge';
 import { Platform, StyleSheet } from 'react-native';
 import ResponsiveStylesSheet from 'react-native-responsive-stylesheet';
-import { ScaledSheet } from 'react-native-size-matters';
+import { ScaledSheet, scale } from 'react-native-size-matters';
 
 import Utils from '../../../utils/Utils';
 
@@ -25,14 +25,31 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
       flex: 1,
       backgroundColor: commonColor.containerBgColor
     },
+    backgroundImageContainer: {
+      width: '95%',
+      height: '100@s',
+      alignSelf: 'center'
+    },
     backgroundImage: {
+      borderRadius: scale(18),
+      width: '100%'
+    },
+    // backgroundImage: {
+    //   width: '100%',
+    //   height: '125@s'
+    // },
+    imageInnerContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-evenly',
+      alignItems: 'center',
       width: '100%',
-      height: '150@s'
+      height: '100%',
+      borderRadius: '18@s'
     },
     reservationContainer: {
+      padding: '0@s',
       justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'transparent'
+      alignSelf: 'center'
     },
     headerContent: {
       flexDirection: 'row',
@@ -156,14 +173,63 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
       height: '60@s',
       color: commonColor.textColor
     },
-    labelImage: {
-      color: commonColor.textColor,
-      paddingTop: '2@s',
-      fontSize: '10@s'
+    buttonReservation: {
+      width: '90@s',
+      height: '90@s',
+      borderRadius: '45@s',
+      borderStyle: 'solid',
+      borderWidth: '2@s',
+      borderColor: commonColor.textColor,
+      backgroundColor: commonColor.containerBgColor,
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    cancelReservation: {
+      borderColor: commonColor.danger
+    },
+    buttonReservationDisabled: {
+      borderColor: commonColor.buttonDisabledBg
+    },
+    reservationIcon: {
+      fontSize: '75@s'
+    },
+    cancelReservationIcon: {
+      color: commonColor.danger
+    },
+    reservationDisabledIcon: {
+      color: commonColor.buttonDisabledBg,
+      backgroundColor: 'transparent'
+    },
+    noButtonCancelReservation: {
+      height: '15@s'
+    },
+    deleteReservationButton: {
+      width: '50@s',
+      height: '50@s',
+      borderRadius: '25@s',
+      borderStyle: 'solid',
+      borderWidth: '2@s',
+      borderColor: commonColor.brandDangerDark,
+      backgroundColor: commonColor.containerBgColor,
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    deleteReservationIcon: {
+      fontSize: '25@s',
+      color: commonColor.brandDangerDark
+    },
+    justifyContentContainer: {
+      width: '50@s',
+      height: '50@s',
+      backgroundColor: 'transparent'
     }
   });
   const portraitStyles = {};
-  const landscapeStyles = {};
+  const landscapeStyles = {
+    deleteReservationContainer: {
+      marginLeft: '84%'
+    }
+  };
   return ResponsiveStylesSheet.createOriented({
     landscape: deepmerge(commonStyles, landscapeStyles) as StyleSheet.NamedStyles<any>,
     portrait: deepmerge(commonStyles, portraitStyles) as StyleSheet.NamedStyles<any>

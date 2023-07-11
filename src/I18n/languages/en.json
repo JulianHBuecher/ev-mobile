@@ -661,6 +661,14 @@
       "details": "",
       "success": "The reservation '{{reservationID}}' has been saved successfully",
       "error": "Cannot change the reservation details, check the logs"
+    },
+    "delete": {
+      "title": "Delete Reservation",
+      "tooltips": "Delete Reservation",
+      "confirm": "Do you really want to delete the reservation '{{reservationID}}'?",
+      "details": "",
+      "success": "The reservation '{{reservationID}}' is successfully deleted",
+      "error": "An error occurred during the deletion of the reservation, check the logs"
     }
   }
 }
