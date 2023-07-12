@@ -140,14 +140,11 @@ export default class ReserveNow extends BaseScreen<Props, State> {
           keyboardShouldPersistTaps={'handled'}
           style={formStyle.scrollView}>
           {this.state.selectedUser && (
-            <Input
-              containerStyle={formStyle.inputContainer}
-              inputStyle={formStyle.inputText}
-              inputContainerStyle={[formStyle.inputTextContainer, expiryDate && { paddingLeft: 0 }]}
-              labelStyle={style.inputLabel}
-              renderErrorMessage={false}
-              InputComponent={() => this.renderExpiryDatePicker(style, expiryDate)}
-            />
+            <View style={[formStyle.inputContainer]}>
+              <View style={[formStyle.inputTextContainer, formStyle.inputText, { paddingLeft: 0 }]}>
+                {this.renderExpiryDatePicker(style, expiryDate)}
+              </View>
+            </View>
           )}
           {this.securityProvider?.canListUsers() && (
             <Input

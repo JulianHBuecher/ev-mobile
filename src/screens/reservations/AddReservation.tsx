@@ -65,9 +65,6 @@ export default class AddReservation extends BaseScreen<Props, State> {
   public state: State;
   public props: Props;
   private currentUser: UserToken;
-  private carModalRef = React.createRef<ModalSelect<Car>>();
-  private tagModalRef = React.createRef<ModalSelect<Tag>>();
-  private chargingStationModalRef = React.createRef<ModalSelect<ChargingStation>>();
 
   public constructor(props: Props) {
     super(props);
@@ -151,47 +148,35 @@ export default class AddReservation extends BaseScreen<Props, State> {
           keyboardShouldPersistTaps={'handled'}
           style={formStyle.scrollView}>
           {type === ReservationType.RESERVE_NOW && (
-            <Input
-              containerStyle={formStyle.inputContainer}
-              inputStyle={formStyle.inputText}
-              inputContainerStyle={[formStyle.inputTextContainer, expiryDate && { paddingLeft: 0 }]}
-              labelStyle={style.inputLabel}
-              renderErrorMessage={!this.checkDate(expiryDate)}
-              errorMessage={!this.checkDate(expiryDate) ? I18n.t('reservations.invalidDate') : null}
-              InputComponent={() =>
-                this.renderDatePicker(
+            <View style={[formStyle.inputContainer]}>
+              <View style={[formStyle.inputTextContainer, formStyle.inputText, { paddingLeft: 0 }]}>
+                {this.renderDatePicker(
                   'reservations.expiryDate',
                   (newExpiryDate: Date) => this.setState({ expiryDate: newExpiryDate }),
                   expiryDate
-                )
-              }
-            />
+                )}
+              </View>
+            </View>
           )}
           {type === ReservationType.PLANNED_RESERVATION && (
-            <Input
-              containerStyle={formStyle.inputContainer}
-              inputStyle={formStyle.inputText}
-              inputContainerStyle={[formStyle.inputTextContainer, fromDate && { paddingLeft: 0 }]}
-              labelStyle={style.inputLabel}
-              renderErrorMessage={!this.checkDate(fromDate)}
-              errorMessage={!this.checkDate(fromDate) ? I18n.t('reservations.invalidDate') : null}
-              InputComponent={() =>
-                this.renderDatePicker('reservations.fromDate', (newFromDate: Date) => this.setState({ fromDate: newFromDate }), fromDate)
-              }
-            />
+            <View style={[formStyle.inputContainer]}>
+              <View style={[formStyle.inputTextContainer, formStyle.inputText, { paddingLeft: 0 }]}>
+                {this.renderDatePicker(
+                  'reservations.fromDate',
+                  (newFromDate: Date) => this.setState({ fromDate: newFromDate }),
+                  fromDate,
+                  null,
+                  toDate
+                )}
+              </View>
+            </View>
           )}
           {type === ReservationType.PLANNED_RESERVATION && (
-            <Input
-              containerStyle={formStyle.inputContainer}
-              inputStyle={formStyle.inputText}
-              inputContainerStyle={[formStyle.inputTextContainer, toDate && { paddingLeft: 0 }]}
-              labelStyle={style.inputLabel}
-              renderErrorMessage={!this.checkDateRange(fromDate, toDate)}
-              errorMessage={!this.checkDateRange(fromDate, toDate) ? I18n.t('reservations.invalidDateRange') : null}
-              InputComponent={() =>
-                this.renderDatePicker('reservations.toDate', (newToDate: Date) => this.setState({ toDate: newToDate }), toDate)
-              }
-            />
+            <View style={[formStyle.inputContainer]}>
+              <View style={[formStyle.inputTextContainer, formStyle.inputText, { paddingLeft: 0 }]}>
+                {this.renderDatePicker('reservations.toDate', (newToDate: Date) => this.setState({ toDate: newToDate }), toDate, fromDate)}
+              </View>
+            </View>
           )}
           <Input
             containerStyle={formStyle.inputContainer}
@@ -204,7 +189,6 @@ export default class AddReservation extends BaseScreen<Props, State> {
                 openable={true}
                 disabled={!(!!this.state.expiryDate || (!!this.state.fromDate && !!this.state.toDate))}
                 defaultItems={[selectedChargingStation]}
-                ref={this.chargingStationModalRef}
                 renderItemPlaceholder={() => this.renderChargingStationPlaceholder(style)}
                 renderItem={(chargingStation: ChargingStation) => this.renderChargingStation(style, chargingStation)}
                 onItemsSelected={(chargingStations: ChargingStation[]) => this.onChargingStationSelected(chargingStations?.[0])}
@@ -282,7 +266,6 @@ export default class AddReservation extends BaseScreen<Props, State> {
                   openable={true}
                   disabled={false}
                   defaultItems={[selectedTag]}
-                  ref={this.tagModalRef}
                   renderItem={(tag: Tag) => this.renderTag(style, tag)}
                   renderItemPlaceholder={() => this.renderTagPlaceholder(style)}
                   onItemsSelected={(tags: Tag[]) => this.setState({ selectedTag: tags?.[0] }, () => void this.loadUserSessionContext())}
@@ -306,7 +289,6 @@ export default class AddReservation extends BaseScreen<Props, State> {
                   openable={true}
                   disabled={false}
                   defaultItems={[selectedCar]}
-                  ref={this.carModalRef}
                   renderItemPlaceholder={() => this.renderCarPlaceholder(style)}
                   renderItem={(car) => <CarComponent car={car} navigation={navigation} />}
                   onItemsSelected={(cars: Car[]) => this.setState({ selectedCar: cars?.[0] }, () => void this.loadUserSessionContext())}
@@ -430,7 +412,7 @@ export default class AddReservation extends BaseScreen<Props, State> {
     maxDate?: Date
   ) {
     const minimumDate = minDate ?? moment().toDate();
-    const maximumDate = maxDate ?? moment().add(2, 'd').toDate();
+    const maximumDate = maxDate ?? null;
     date = date ?? Utils.generateDateWithDelay(0, 1, 0, 0);
     const locale = this.currentUser?.locale;
     const is24Hour = I18nManager?.isLocale24Hour(locale);

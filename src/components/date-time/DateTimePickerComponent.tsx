@@ -9,6 +9,7 @@ import Utils from '../../utils/Utils';
 import { scale } from 'react-native-size-matters';
 import Foundation from 'react-native-vector-icons/Foundation';
 import DateTimePicker from 'react-native-modal-datetime-picker';
+import Message from '../../utils/Message';
 
 export interface Props {
   title: string;
@@ -22,6 +23,7 @@ export interface Props {
 }
 
 interface State {
+  value: Date;
   openDateTimePicker: boolean;
 }
 
@@ -31,7 +33,9 @@ export default class DateTimePickerComponent extends React.Component<Props, Stat
 
   public constructor(props: Props) {
     super(props);
+    this.onConfirm.bind(this);
     this.state = {
+      value: null,
       openDateTimePicker: false
     };
   }
@@ -92,15 +96,17 @@ export default class DateTimePickerComponent extends React.Component<Props, Stat
     const { onDateTimeChanged } = this.props;
     // Workaround to fix the bug from react-native-modal-datetime-picker
     newDateTime = this.fitDateWithinMinAndMax(newDateTime);
-    this.setState({ openDateTimePicker: false, dateTime: newDateTime }, () => onDateTimeChanged?.(newDateTime));
+    this.setState({ openDateTimePicker: false, value: newDateTime }, () => onDateTimeChanged?.(newDateTime));
   }
 
   private fitDateWithinMinAndMax(date: Date): Date {
     const { maximumDateTime, minimumDateTime } = this.props;
     if (date) {
-      if (date < minimumDateTime) {
+      if (minimumDateTime && date < minimumDateTime) {
+        Message.showError(I18n.t('reservations.invalidDateRange'));
         return minimumDateTime;
-      } else if (date > maximumDateTime) {
+      } else if (maximumDateTime && date > maximumDateTime) {
+        Message.showError(I18n.t('reservations.invalidDateRange'));
         return maximumDateTime;
       }
     }
