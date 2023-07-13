@@ -588,7 +588,7 @@
     "siteAreasRoamingFilterLabel": "Roaming-Standortbereiche zeigen",
     "transactionsRoamingFilterLabel": "Roaming-Ladevorgänge zeigen",
     "usersRoamingFilterLabel": "Roaming-Nutzer zeigen",
-    "showExpiredReservationsLabel": "Abgelaufene Reservierungen anzeigen"
+    "activeReservationsFilterLabel": "Aktive Reservierungen anzeigen"
   },
   "settingsDistanceUnit": {
     "distanceUnit": "Distance unit",
@@ -669,6 +669,19 @@
       "details": "",
       "success": "Die Reservierung '{{reservationID}}' wurde erfolgreich gelöscht",
       "error": "Beim Löschen der Reservierung ist ein Fehler aufgetreten"
+    },
+    "action_error": {
+      "general": {
+        "not_found": "Die Reservierung wurde nicht gefunden",
+        "already_exists": "Die Reservierung mit der ID '{{reservationID}}' existiert bereits für einen anderen Nutzer",
+        "not_supported": "Das Feature 'Reservierungen' ist für diese Ladestation nicht aktiviert",
+        "rejected": "The reservation was rejected",
+        "collision": "Die Reservierung kollidiert mit anderen Reservierung(en) für den gewünschten Zeitraum. Wählen Sie ein anderes Zeitfenster aus",
+        "faulted": "Die gewünschte Ladesäule oder der gewünschte Anschluss änderten ihren Status in 'FEHLERHAFT' während der Reservierung",
+        "occupied": "Die gewünschte Ladesäule oder der gewünschte Anschluss änderten ihren Status in 'BESETZT' während der Reservierung",
+        "unavailable": "Die gewünschte Ladesäule oder der gewünschte Anschluss änderten ihren Status in 'NICHT VERFÜGBAR' während der Reservierung",
+        "multiple_reserve_now": "Es ist nur eine 'RESERVE NOW' Reservierung pro Nutzer zeitgleich möglich"
+      }
     }
   }
 }

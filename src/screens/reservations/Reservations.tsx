@@ -16,12 +16,13 @@ import SimpleSearchComponent from '../../components/search/simple/SimpleSearchCo
 import SelectableList, { SelectableProps, SelectableState } from '../../screens/base-screen/SelectableList';
 import { DataResult } from '../../types/DataResult';
 import { PagingParams } from '../../types/QueryParams';
-import Reservation from '../../types/Reservation';
+import Reservation, { ReservationStatus } from '../../types/Reservation';
 import User from '../../types/User';
 import Constants from '../../utils/Constants';
 import Utils from '../../utils/Utils';
 import ReservationsFilters, { ReservationsFiltersDef } from './ReservationsFilters';
 import computeStyleSheet from './ReservationsStyles';
+import moment from 'moment';
 
 export interface Props extends SelectableProps<Reservation> {
   userIDs?: string[];
@@ -36,8 +37,8 @@ interface State extends SelectableState<Reservation> {
   limit?: number;
   isAdmin?: boolean;
   filters?: ReservationsFiltersDef;
-  reservationsFromDate?: Date;
-  reservationsToDate?: Date;
+  reservationsMinFromDate?: Date;
+  reservationsMaxToDate?: Date;
 }
 
 export default class Reservations extends SelectableList<Reservation> {
@@ -47,8 +48,8 @@ export default class Reservations extends SelectableList<Reservation> {
 
   public constructor(props: Props) {
     super(props);
-    this.selectMultipleTitle = 'reservations.selectReservations';
-    this.selectSingleTitle = 'reservations.selectReservation';
+    this.selectMultipleTitle = I18n.t('reservations.selectReservations');
+    this.selectSingleTitle = I18n.t('reservations.selectReservation');
     this.singleItemTitle = I18n.t('reservations.title');
     this.multiItemsTitle = I18n.t('reservations.titles');
     this.state = {
@@ -59,10 +60,10 @@ export default class Reservations extends SelectableList<Reservation> {
       limit: Constants.PAGING_SIZE,
       count: 0,
       isAdmin: false,
-      filters: null,
-      reservationsFromDate: null,
-      reservationsToDate: null,
-      selectedItems: []
+      selectedItems: [],
+      filters: {},
+      reservationsMinFromDate: null,
+      reservationsMaxToDate: null
     };
   }
 
@@ -104,7 +105,7 @@ export default class Reservations extends SelectableList<Reservation> {
   public getReservations = async (searchText: string = '', paging: PagingParams, params?: {}): Promise<DataResult<Reservation>> => {
     try {
       const { sorting, isModal } = this.props;
-      const { fromDateTime, toDateTime, expiryDateTime, users } = this.state.filters;
+      const { fromDateTime, toDateTime, users, onlyActiveReservations } = this.state.filters;
       const userID = isModal ? this.props.userIDs?.join('|') : users?.map((user: User) => user?.id).join('|');
       params = params ?? {
         Search: searchText,
@@ -115,7 +116,8 @@ export default class Reservations extends SelectableList<Reservation> {
         WithSiteArea: true,
         WithTag: true,
         WithUser: true,
-        WithCar: true
+        WithCar: true,
+        Status: onlyActiveReservations ? [ReservationStatus.IN_PROGRESS, ReservationStatus.SCHEDULED].join('|') : null
       };
       const reservations = await this.centralServerProvider.getReservations(params, paging, [sorting ?? '-createdOn']);
       if (reservations?.count === -1) {
@@ -149,10 +151,18 @@ export default class Reservations extends SelectableList<Reservation> {
       this.setState(newState, async () => {
         // Refresh all
         const reservations = await this.getReservations(this.searchText, { skip: 0, limit: skip + limit });
+        const reservationsFromDates =
+          reservations.result > 0 ? reservations.result.map((reservation) => moment(reservation.fromDate).toDate()) : [moment().toDate()];
+        const reservationsToDates =
+          reservations.result > 0 ? reservations.result.map((reservation) => moment(reservation.toDate).toDate()) : [moment().toDate()];
+        const reservationsMinFromDate = new Date(Math.min(...reservationsFromDates));
+        const reservationsMaxToDate = new Date(Math.min(...reservationsToDates));
         // Set Reservations
         this.setState({
           loading: false,
           refreshing: false,
+          reservationsMinFromDate,
+          reservationsMaxToDate,
           reservations: reservations ? reservations.result : [],
           count: reservations ? reservations.count : 0,
           isAdmin: this.securityProvider ? this.securityProvider.isAdmin() : false
@@ -272,8 +282,8 @@ export default class Reservations extends SelectableList<Reservation> {
     return (
       <View style={style.filtersContainer}>
         <ReservationsFilters
-          reservationFromDate={this.state.reservationsFromDate}
-          reservationToDate={this.state.reservationsToDate}
+          reservationMinFromDate={this.state.reservationsMinFromDate}
+          reservationMaxToDate={this.state.reservationsMaxToDate}
           onFilterChanged={(newFilters: ReservationsFiltersDef) => this.onFiltersChanged(newFilters)}
           ref={(reservationsFilters: ReservationsFilters) => this.setScreenFilters(reservationsFilters, false)}
         />

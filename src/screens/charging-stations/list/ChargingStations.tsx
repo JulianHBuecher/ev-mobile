@@ -1,7 +1,7 @@
 import I18n from 'i18n-js';
 import { Icon, Spinner } from 'native-base';
 import React from 'react';
-import { ActivityIndicator, Alert, BackHandler, Image, ImageStyle, SafeAreaView, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, BackHandler, Image, ImageStyle, SafeAreaView, TouchableOpacity, View } from 'react-native';
 import { Marker, Region } from 'react-native-maps';
 import Modal from 'react-native-modal';
 import computeConnectorStatusStyles from '../../../components/connector-status/ConnectorStatusComponentStyles';
@@ -61,6 +61,7 @@ export default class ChargingStations extends BaseAutoRefreshScreen<Props, State
   private currentRegion: Region;
   private mapLimit = 500;
   private listLimit = 25;
+  private mapViewRef: React.RefObject<any>;
 
   public constructor(props: Props) {
     super(props);
@@ -89,6 +90,7 @@ export default class ChargingStations extends BaseAutoRefreshScreen<Props, State
       await this.refresh(true);
     }
     this.handleNavigationParameters();
+    this.mapViewRef = React.createRef();
   }
 
   public componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
@@ -187,9 +189,9 @@ export default class ChargingStations extends BaseAutoRefreshScreen<Props, State
     return true;
   }
 
-  public async computeRegion(): Promise<Region> {
+  public async computeRegion(locateUser: boolean = false): Promise<Region> {
     // If Site Area, use its coordinates
-    if (this.siteArea) {
+    if (this.siteArea && !locateUser) {
       return {
         longitude: this.siteArea.address.coordinates[0],
         latitude: this.siteArea.address.coordinates[1],
@@ -199,7 +201,7 @@ export default class ChargingStations extends BaseAutoRefreshScreen<Props, State
     }
     // Else, if currentLocation available, use it
     const currentLocation = await Utils.getUserCurrentLocation();
-    if (currentLocation) {
+    if (currentLocation || locateUser) {
       return {
         longitude: currentLocation.longitude,
         latitude: currentLocation.latitude,
@@ -426,6 +428,7 @@ export default class ChargingStations extends BaseAutoRefreshScreen<Props, State
           />
         )}
         <ClusterMap<ChargingStation>
+          ref={this.mapViewRef}
           items={chargingStationsWithGPSCoordinates}
           satelliteMap={satelliteMap}
           renderMarker={(chargingStation, index) => (
@@ -459,7 +462,14 @@ export default class ChargingStations extends BaseAutoRefreshScreen<Props, State
     return (
       <SafeAreaView style={fabStyles.fabContainer}>
         {showMap && (
-          <TouchableOpacity style={fabStyles.fab} onPress={() => this.setState({ satelliteMap: !satelliteMap })}>
+          <TouchableOpacity
+            style={[fabStyles.fab]}
+            onPress={async () => this.mapViewRef.current?.animateToRegion(await this.computeRegion(true))}>
+            <Icon size={scale(18)} style={fabStyles.fabIcon} as={MaterialIcons} name={'my-location'} />
+          </TouchableOpacity>
+        )}
+        {showMap && (
+          <TouchableOpacity style={[fabStyles.fab, style.fab]} onPress={() => this.setState({ satelliteMap: !satelliteMap })}>
             <Image
               source={satelliteMap ? (isDarkModeEnabled ? standardDarkLayout : standardLightLayout) : satelliteLayout}
               style={[style.imageStyle, satelliteMap && style.outlinedImage] as ImageStyle}

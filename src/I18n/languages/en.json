@@ -588,7 +588,7 @@
     "siteAreasRoamingFilterLabel": "Show roaming site areas",
     "transactionsRoamingFilterLabel": "Show roaming sessions",
     "usersRoamingFilterLabel": "Show roaming users",
-    "showExpiredReservationsLabel": "Show expired reservations"
+    "activeReservationsFilterLabel": "Show active reservations"
   },
   "settingsDistanceUnit": {
     "distanceUnit": "Distance unit",
@@ -669,6 +669,19 @@
       "details": "",
       "success": "The reservation '{{reservationID}}' is successfully deleted",
       "error": "An error occurred during the deletion of the reservation, check the logs"
+    },
+    "action_error": {
+      "general": {
+        "not_found": "The reservation has not been found",
+        "already_exists": "The reservation with the ID {{reservationID}} already exists for another user",
+        "not_supported": "The feature 'Reservations' is not enabled for this charging station",
+        "rejected": "The reservation was rejected",
+        "collision": "This reservation collides with another reservation for this time slot. Choose another time",
+        "faulted": "The specified charging station or connector changed to 'FAULTED' state during reservation",
+        "occupied": "The specified charging station or connector changed to 'OCCUPIED' state during reservation",
+        "unavailable": "The specified charging station or connector changed to 'UNAVAILABLE' state during reservation",
+        "multiple_reserve_now": "Only one 'RESERVE NOW' reservation per user is possible"
+      }
     }
   }
 }

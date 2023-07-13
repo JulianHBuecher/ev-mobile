@@ -1,6 +1,7 @@
 import CreatedUpdatedProps from './CreatedUpdatedProps';
 import { KeyValue } from './Global';
 import ListItem from './ListItem';
+import Reservation from './Reservation';
 import Site from './Site';
 import SiteArea from './SiteArea';
 import { InactivityStatus } from './Transaction';
@@ -103,6 +104,7 @@ export interface Connector {
   chargePointID?: number;
   canReadTransaction?: boolean;
   reservationID?: number;
+  reservation?: Reservation;
   canReserveNow?: boolean;
   canCancelReservation?: boolean;
 }

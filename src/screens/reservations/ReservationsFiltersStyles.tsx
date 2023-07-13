@@ -5,6 +5,15 @@ import { ScaledSheet } from 'react-native-size-matters';
 
 export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
   const commonStyles = ScaledSheet.create({
+    dateFiltersContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      width: '100%',
+      marginTop: '30@s'
+    },
+    dateFilterComponentContainer: {
+      width: '48%'
+    },
     switchFilterControlComponentContainer: {
       justifyContent: 'space-between',
       marginBottom: '30@s'

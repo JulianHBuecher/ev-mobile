@@ -2,16 +2,15 @@ import { StatusCodes } from 'http-status-codes';
 import I18n from 'i18n-js';
 import { Icon, Spinner } from 'native-base';
 import React from 'react';
-import { Image, ImageStyle, ScrollView, Text, View } from 'react-native';
+import { ImageBackground, ImageStyle, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { scale } from 'react-native-size-matters';
 import noSite from '../../../../assets/no-site.png';
 import I18nManager from '../../../I18n/I18nManager';
 import HeaderComponent from '../../../components/header/HeaderComponent';
 import UserAvatar from '../../../components/user/avatar/UserAvatar';
-import BaseScreen from '../../../screens/base-screen/BaseScreen';
 import BaseProps from '../../../types/BaseProps';
-import Reservation from '../../../types/Reservation';
+import Reservation, { ReservationStatus } from '../../../types/Reservation';
 import Message from '../../../utils/Message';
 import Utils from '../../../utils/Utils';
 import computeStyleSheet from './ReservationDetailsStyles';
@@ -19,6 +18,10 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { RestResponse } from '../../../types/ActionResponse';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import User from '../../../types/User';
+import DialogModal from '../../../components/modal/DialogModal';
+import computeModalCommonStyle from '../../../components/modal/ModalCommonStyle';
+import computeFabStyles from '../../../components/fab/FabComponentStyles';
+import BaseAutoRefreshScreen from '../../../screens/base-screen/BaseAutoRefreshScreen';
 
 export interface Props extends BaseProps {}
 
@@ -32,9 +35,13 @@ interface State {
   refreshing?: boolean;
   isAdmin?: boolean;
   isSiteAdmin?: boolean;
+  canCancelReservation?: boolean;
+  showCancelReservationDialog: boolean;
+  canDeleteReservation?: boolean;
+  showDeleteReservationDialog: boolean;
 }
 
-export default class ReservationDetails extends BaseScreen<Props, State> {
+export default class ReservationDetails extends BaseAutoRefreshScreen<Props, State> {
   public state: State;
   public props: Props;
 
@@ -48,7 +55,11 @@ export default class ReservationDetails extends BaseScreen<Props, State> {
       isSmartChargingActive: false,
       isCarActive: false,
       buttonDisabled: true,
-      refreshing: false
+      refreshing: false,
+      canCancelReservation: false,
+      showCancelReservationDialog: false,
+      canDeleteReservation: false,
+      showDeleteReservationDialog: false
     };
   }
 
@@ -78,7 +89,9 @@ export default class ReservationDetails extends BaseScreen<Props, State> {
       isAdmin: this.securityProvider ? this.securityProvider.isAdmin() : false,
       isSiteAdmin: this.securityProvider && reservation && siteAreaID ? this.securityProvider.isSiteAdmin(siteID) : false,
       isCarActive: this.securityProvider.isComponentCarActive(),
-      isSmartChargingActive: this.securityProvider.isComponentSmartCharging()
+      isSmartChargingActive: this.securityProvider.isComponentSmartCharging(),
+      canCancelReservation: reservation ? this.canCancelReservation(reservation) : false,
+      canDeleteReservation: reservation ? this.canDeleteReservation(reservation) : false
     });
   }
 
@@ -204,12 +217,23 @@ export default class ReservationDetails extends BaseScreen<Props, State> {
   public render() {
     const style = computeStyleSheet();
     const { reservation } = this.state;
-    const { loading, siteAreaImage, isSmartChargingActive, isCarActive } = this.state;
+    const {
+      loading,
+      siteAreaImage,
+      isSmartChargingActive,
+      isCarActive,
+      canCancelReservation,
+      showCancelReservationDialog,
+      canDeleteReservation,
+      showDeleteReservationDialog
+    } = this.state;
     const connectorLetter = Utils.getConnectorLetterFromConnectorID(reservation ? reservation.connectorID : null);
     return loading ? (
       <Spinner size={scale(30)} style={style.spinner} color="grey" />
     ) : (
       <View style={style.container}>
+        {showCancelReservationDialog && this.renderCancelReservationDialog()}
+        {showDeleteReservationDialog && this.renderDeleteReservationDialog()}
         <HeaderComponent
           navigation={this.props.navigation}
           title={reservation ? I18n.t('reservations.title') : I18n.t('reservations.types.unknown')}
@@ -217,7 +241,21 @@ export default class ReservationDetails extends BaseScreen<Props, State> {
           containerStyle={style.headerContainer}
         />
         {/* Site Area Image */}
-        <Image style={style.backgroundImage as ImageStyle} source={siteAreaImage ? { uri: siteAreaImage } : noSite} />
+        <ImageBackground
+          source={siteAreaImage ? { uri: siteAreaImage } : noSite}
+          imageStyle={style.backgroundImage}
+          style={style.backgroundImageContainer as ImageStyle}>
+          <View style={style.imageInnerContainer}>
+            {/* Provide better icon alignment */}
+            <View style={[style.justifyContentContainer]} />
+            {canCancelReservation ? (
+              <View style={style.reservationContainer}>{this.renderCancelReservationButton(style)}</View>
+            ) : (
+              <View style={style.noButtonCancelReservation} />
+            )}
+            {canDeleteReservation && this.renderDeleteReservationButton(style)}
+          </View>
+        </ImageBackground>
         <View style={style.headerContent}>
           <View style={style.headerRowContainer}>
             <Text style={style.headerName}>
@@ -226,12 +264,14 @@ export default class ReservationDetails extends BaseScreen<Props, State> {
             </Text>
             {reservation?.createdBy.id !== reservation?.tag?.userID && (
               <Text style={style.subHeaderName}>
-                ({I18n.t('reservations.createdBy')}{' '}
+                ({I18n.t('general.createdBy')}{' '}
                 {Utils.buildUserName({ name: reservation.createdBy.name, firstName: reservation.createdBy.firstName } as User)})
               </Text>
             )}
           </View>
         </View>
+        {/* Edit Button */}
+        {this.renderEditReservationButton()}
         <ScrollView style={style.scrollViewContainer} contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap' }}>
           {this.renderUserInfo(style)}
           {this.renderReservationStatus(style)}
@@ -240,17 +280,177 @@ export default class ReservationDetails extends BaseScreen<Props, State> {
           {this.renderChargingStationConnector(style)}
           {isCarActive && this.renderCar(style)}
         </ScrollView>
-        {/* <Button
-          title={I18n.t('reservations.cancel_reservation.title')}
-          titleStyle={formStyle.buttonTitle}
-          disabledStyle={formStyle.buttonDisabled}
-          disabledTitleStyle={formStyle.buttonTextDisabled}
-          containerStyle={formStyle.buttonContainer}
-          buttonStyle={formStyle.button}
-          loadingProps={{ color: commonColors.light }}
-          onPress={() => void this.cancelReservation()}
-        /> */}
       </View>
+    );
+  }
+
+  public canCancelReservation = (reservation: Reservation): boolean =>
+    // if (connector && connector.status === ChargePointStatus.RESERVED) {
+    //   // return this.securityProvider?.canCancelReservation(connector);
+    // }
+    // return false;
+    true;
+
+  public canDeleteReservation = (reservation: Reservation): boolean =>
+    // if (connector && connector.status === ChargePointStatus.RESERVED) {
+    //   // return this.securityProvider?.canCancelReservation(connector);
+    // }
+    // return false;
+    true;
+
+  public renderCancelReservationButton = (style: any) => {
+    const isDisabled = this.isButtonDisabled();
+    return (
+      <TouchableOpacity disabled={isDisabled} onPress={() => this.cancelReservationConfirm()}>
+        <View
+          style={
+            isDisabled
+              ? [style.buttonReservation, style.cancelReservation, style.buttonReservationDisabled]
+              : [style.buttonReservation, style.cancelReservation]
+          }>
+          <Icon
+            style={
+              isDisabled
+                ? [style.reservationIcon, style.cancelReservationIcon, style.reservationDisabledIcon]
+                : [style.reservationIcon, style.cancelReservationIcon]
+            }
+            as={MaterialCommunityIcons}
+            size={scale(75)}
+            name="key-remove"
+          />
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  public renderDeleteReservationButton = (style: any) => {
+    const { isAdmin, isSiteAdmin } = this.state;
+    if (isAdmin || isSiteAdmin) {
+      return (
+        <TouchableOpacity style={style.deleteReservationContainer} onPress={() => this.deleteReservationConfirm()}>
+          <View style={style.deleteReservationButton}>
+            <Icon size={scale(25)} style={style.deleteReservationIcon} as={MaterialIcons} name="delete-outline" />
+          </View>
+        </TouchableOpacity>
+      );
+    } else {
+      return <View style={[style.justifyContentContainer]} />;
+    }
+  };
+
+  public cancelReservationConfirm = () => {
+    this.setState({ showCancelReservationDialog: true });
+  };
+
+  public deleteReservationConfirm = () => {
+    this.setState({ showDeleteReservationDialog: true });
+  };
+
+  public async refresh(showSpinner = false, callback: () => void = () => {}): Promise<void> {
+    const newState = showSpinner ? { refreshing: true } : this.state;
+    this.setState(newState, async () => {
+      const siteAreaImage = this.state.siteAreaImage;
+      const reservationID = Utils.getParamFromNavigation(this.props.route, 'reservationID', null) as number;
+      const reservation = await this.getReservation(reservationID, {
+        WithChargingStation: true,
+        WithTag: true,
+        WithUser: true,
+        WithSiteArea: true,
+        WithCar: true
+      });
+      if (!siteAreaImage && reservation.chargingStation?.siteAreaID) {
+        siteAreaImage = await this.getSiteAreaImage(reservation?.chargingStation?.siteAreaID);
+      }
+      const siteAreaID = reservation.chargingStation.siteAreaID ?? null;
+      const siteID = reservation.chargingStation.siteID ?? null;
+      this.setState(
+        {
+          reservation,
+          loading: false,
+          refreshing: false,
+          siteAreaImage,
+          isAdmin: this.securityProvider ? this.securityProvider.isAdmin() : false,
+          isSiteAdmin: this.securityProvider && reservation && siteAreaID ? this.securityProvider.isSiteAdmin(siteID) : false,
+          isCarActive: this.securityProvider.isComponentCarActive(),
+          isSmartChargingActive: this.securityProvider.isComponentSmartCharging(),
+          canCancelReservation: reservation ? this.canCancelReservation(reservation) : false,
+          canDeleteReservation: reservation ? this.canDeleteReservation(reservation) : false
+        },
+        () => callback?.()
+      );
+    });
+  }
+
+  private isButtonDisabled(): boolean {
+    const { canCancelReservation, reservation } = this.state;
+    return !canCancelReservation || ![ReservationStatus.IN_PROGRESS, ReservationStatus.SCHEDULED].includes(reservation.status);
+  }
+
+  private renderCancelReservationDialog() {
+    const { reservation } = this.state;
+    const chargingStation = reservation.chargingStation;
+    const connector = Utils.getConnectorFromID(chargingStation, reservation.connectorID);
+    const modalCommonStyle = computeModalCommonStyle();
+    const connectorLetter = Utils.getConnectorLetterFromConnectorID(connector.connectorId);
+    return (
+      <DialogModal
+        withCloseButton={true}
+        close={() => this.setState({ showCancelReservationDialog: false })}
+        title={I18n.t('reservations.cancel_reservation.title')}
+        description={I18n.t('reservations.cancel_reservation.confirm', {
+          chargingStationID: chargingStation.id,
+          connectorID: connectorLetter
+        })}
+        buttons={[
+          {
+            text: I18n.t('general.yes'),
+            action: () => {
+              this.cancelReservation();
+              this.setState({ showCancelReservationDialog: false });
+            },
+            buttonStyle: modalCommonStyle.primaryButton,
+            buttonTextStyle: modalCommonStyle.primaryButtonText
+          },
+          {
+            text: I18n.t('general.no'),
+            action: () => this.setState({ showCancelReservationDialog: false }),
+            buttonStyle: modalCommonStyle.primaryButton,
+            buttonTextStyle: modalCommonStyle.primaryButtonText
+          }
+        ]}
+      />
+    );
+  }
+
+  private renderDeleteReservationDialog() {
+    const { reservation } = this.state;
+    const modalCommonStyle = computeModalCommonStyle();
+    return (
+      <DialogModal
+        withCloseButton={true}
+        close={() => this.setState({ showCancelReservationDialog: false })}
+        title={I18n.t('reservations.delete.title')}
+        description={I18n.t('reservations.delete.confirm', {
+          reservationID: reservation.id
+        })}
+        buttons={[
+          {
+            text: I18n.t('general.yes'),
+            action: () => {
+              this.deleteReservation();
+              this.setState({ showDeleteReservationDialog: false });
+            },
+            buttonStyle: modalCommonStyle.primaryButton,
+            buttonTextStyle: modalCommonStyle.primaryButtonText
+          },
+          {
+            text: I18n.t('general.no'),
+            action: () => this.setState({ showDeleteReservationDialog: false }),
+            buttonStyle: modalCommonStyle.primaryButton,
+            buttonTextStyle: modalCommonStyle.primaryButtonText
+          }
+        ]}
+      />
     );
   }
 
@@ -258,6 +458,8 @@ export default class ReservationDetails extends BaseScreen<Props, State> {
     const { reservation } = this.state;
     if (reservation) {
       try {
+        // Disable button
+        this.setState({ buttonDisabled: true });
         // Cancel Reservation
         const response = await this.centralServerProvider.cancelReservation(reservation);
         if (response?.status === RestResponse.SUCCESS) {
@@ -275,10 +477,62 @@ export default class ReservationDetails extends BaseScreen<Props, State> {
         }
       } catch (error) {
         // Enable the button
-        // this.setState({ buttonDisabled: false });
+        this.setState({ buttonDisabled: false });
         // Other common Error
         await Utils.handleHttpUnexpectedError(this.centralServerProvider, error, 'general.unexpectedErrorBackend', this.props.navigation);
       }
     }
+  }
+
+  private async deleteReservation() {
+    const { reservation } = this.state;
+    if (reservation) {
+      try {
+        // Disable button
+        this.setState({ buttonDisabled: true });
+        // Delete Reservation
+        const response = await this.centralServerProvider.deleteReservation(reservation);
+        if (response?.status === RestResponse.SUCCESS) {
+          Message.showSuccess(
+            I18n.t('reservations.delete.success', {
+              reservationID: reservation.id
+            })
+          );
+          this.props.navigation.navigate('Reservations', { refresh: true });
+          return;
+        } else {
+          // Show message
+          Message.showError(I18n.t('reservations.delete.error'));
+        }
+      } catch (error) {
+        // Enable the button
+        this.setState({ buttonDisabled: false });
+        // Other common Error
+        await Utils.handleHttpUnexpectedError(this.centralServerProvider, error, 'general.unexpectedErrorBackend', this.props.navigation);
+      }
+    }
+  }
+
+  private renderEditReservationButton() {
+    const { reservation } = this.state;
+    const { navigation } = this.props;
+    const fabStyles = computeFabStyles();
+    if (![ReservationStatus.IN_PROGRESS, ReservationStatus.SCHEDULED].includes(reservation.status)) {
+      return;
+    }
+    return (
+      <SafeAreaView style={fabStyles.fabContainer}>
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate('EditReservation', {
+              params: { reservation },
+              key: `${Utils.randomNumber()}`
+            })
+          }
+          style={fabStyles.fab}>
+          <Icon style={fabStyles.fabIcon} size={scale(18)} as={MaterialCommunityIcons} name={'book-edit'} />
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
   }
 }

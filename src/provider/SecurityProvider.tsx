@@ -3,6 +3,7 @@ import { Action, Entity, Role } from '../types/Authorization';
 import SiteArea from '../types/SiteArea';
 import { TenantComponents } from '../types/Tenant';
 import UserToken from '../types/UserToken';
+import ChargingStation, { Connector } from 'types/ChargingStation';
 
 export default class SecurityProvider {
   private loggedUser: UserToken;
@@ -158,18 +159,15 @@ export default class SecurityProvider {
         }
         return !siteArea.accessControl || this.isSiteAdmin(siteArea.siteID) || this.loggedUser.sites.includes(siteArea.siteID);
       }
-      return true;
+      return this.isAdmin();
     }
     return false;
   }
 
-  public canCancelReservation(reservation: Reservation): boolean {
+  public canCancelReservation(connector: Connector, siteArea: SiteArea): boolean {
     if (this.canAccess(Entity.CHARGING_STATION, Action.CANCEL_RESERVATION)) {
       if (this.isComponentActive(TenantComponents.ORGANIZATION)) {
-        if (this.loggedUser.tagIDs.includes(reservation.idTag)) {
-          return true;
-        }
-        // return !siteArea.accessControl || this.isSiteAdmin(siteArea.siteID) || this.loggedUser.sites.includes(siteArea.siteID);
+        return connector.canCancelReservation || !siteArea.accessControl || this.isSiteAdmin(siteArea.siteID);
       }
       return this.isAdmin();
     }

@@ -44,6 +44,7 @@ import { ReservationStatus, ReservationType } from '../types/Reservation';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Icon } from 'native-base';
+import { HTTPError } from '../types/HTTPError';
 
 export default class Utils {
   public static async getEndpointClouds(): Promise<EndpointCloud[]> {
@@ -1171,12 +1172,33 @@ export default class Utils {
     return Math.floor(Math.random() * 1000000000 + 1);
   }
 
-  // public static createSortFieldParam(field: string, order: string = Constants.ORDERING.asc): Ordering {
-  //   if (order === Constants.ORDERING.desc) {
-  //     return { field: `-${field}` };
-  //   }
-  //   return { field: `${field}` };
-  // }
+  public static handleReservationResponses(error: Response) {
+    switch (error.status) {
+      case HTTPError.RESERVATION_ALREADY_EXISTS_ERROR:
+        Message.showError('reservations.action_error.general.already_exists');
+        break;
+      case HTTPError.RESERVATION_NOT_SUPPORTED_ERROR:
+        Message.showError('reservations.action_error.general.not_supported');
+        break;
+      case HTTPError.RESERVATION_REJECTED_ERROR:
+        Message.showError('reservations.action_error.general.rejected');
+        break;
+      case HTTPError.RESERVATION_COLLISION_ERROR:
+        Message.showError('reservations.action_error.general.collision');
+        break;
+      case HTTPError.RESERVATION_FAULTED_ERROR:
+        Message.showError('reservations.action_error.general.faulted');
+        break;
+      case HTTPError.RESERVATION_OCCUPIED_ERROR:
+        Message.showError('reservations.action_error.general.occupied');
+        break;
+      case HTTPError.RESERVATION_UNAVAILABLE_ERROR:
+        Message.showError('reservations.action_error.general.unavailable');
+        break;
+      case HTTPError.RESERVATION_MULTIPLE_RESERVE_NOW_ERROR:
+        Message.showError('reservations.action_error.general.multiple_reserve_now');
+    }
+  }
 
   private static getDeviceLocale(): string {
     return (

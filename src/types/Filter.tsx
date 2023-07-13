@@ -8,5 +8,6 @@ export enum GlobalFilters {
   ROAMING = 'Roaming',
   RESERVATIONS_FROM_DATE_FILTER = 'ReservationsFromDateFilter',
   RESERVATIONS_TO_DATE_FILTER = 'ReservationToDateFilter',
-  RESERVATIONS_EXPIRY_DATE_FILTER = 'ReservationExpiryDateFilter'
+  RESERVATIONS_EXPIRY_DATE_FILTER = 'ReservationExpiryDateFilter',
+  ONLY_ACTIVE_RESERVATIONS = 'OnlyActiveReservations'
 }

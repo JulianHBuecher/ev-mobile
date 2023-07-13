@@ -155,47 +155,35 @@ export default class EditReservation extends BaseScreen<Props, State> {
           keyboardShouldPersistTaps={'handled'}
           style={formStyle.scrollView}>
           {type === ReservationType.RESERVE_NOW && (
-            <Input
-              containerStyle={formStyle.inputContainer}
-              inputStyle={formStyle.inputText}
-              inputContainerStyle={[formStyle.inputTextContainer, expiryDate && { paddingLeft: 0 }]}
-              labelStyle={style.inputLabel}
-              renderErrorMessage={!this.checkDate(expiryDate)}
-              errorMessage={!this.checkDate(expiryDate) ? I18n.t('reservations.invalidDate') : null}
-              InputComponent={() =>
-                this.renderDatePicker(
+            <View style={[formStyle.inputContainer]}>
+              <View style={[formStyle.inputTextContainer, formStyle.inputText, { paddingLeft: 0 }]}>
+                {this.renderDatePicker(
                   'reservations.expiryDate',
                   (newExpiryDate: Date) => this.setState({ expiryDate: newExpiryDate }),
                   expiryDate
-                )
-              }
-            />
+                )}
+              </View>
+            </View>
           )}
           {type === ReservationType.PLANNED_RESERVATION && (
-            <Input
-              containerStyle={formStyle.inputContainer}
-              inputStyle={formStyle.inputText}
-              inputContainerStyle={[formStyle.inputTextContainer, fromDate && { paddingLeft: 0 }]}
-              labelStyle={style.inputLabel}
-              renderErrorMessage={!this.checkDate(fromDate)}
-              errorMessage={!this.checkDate(fromDate) ? I18n.t('reservations.invalidDate') : null}
-              InputComponent={() =>
-                this.renderDatePicker('reservations.fromDate', (newFromDate: Date) => this.setState({ fromDate: newFromDate }), fromDate)
-              }
-            />
+            <View style={[formStyle.inputContainer]}>
+              <View style={[formStyle.inputTextContainer, formStyle.inputText, { paddingLeft: 0 }]}>
+                {this.renderDatePicker(
+                  'reservations.fromDate',
+                  (newFromDate: Date) => this.setState({ fromDate: newFromDate }),
+                  fromDate,
+                  null,
+                  toDate
+                )}
+              </View>
+            </View>
           )}
           {type === ReservationType.PLANNED_RESERVATION && (
-            <Input
-              containerStyle={formStyle.inputContainer}
-              inputStyle={formStyle.inputText}
-              inputContainerStyle={[formStyle.inputTextContainer, toDate && { paddingLeft: 0 }]}
-              labelStyle={style.inputLabel}
-              renderErrorMessage={!this.checkDateRange(fromDate, toDate)}
-              errorMessage={!this.checkDateRange(fromDate, toDate) ? I18n.t('reservations.invalidDateRange') : null}
-              InputComponent={() =>
-                this.renderDatePicker('reservations.toDate', (newToDate: Date) => this.setState({ toDate: newToDate }), toDate)
-              }
-            />
+            <View style={[formStyle.inputContainer]}>
+              <View style={[formStyle.inputTextContainer, formStyle.inputText, { paddingLeft: 0 }]}>
+                {this.renderDatePicker('reservations.toDate', (newToDate: Date) => this.setState({ toDate: newToDate }), toDate, fromDate)}
+              </View>
+            </View>
           )}
           <Input
             containerStyle={formStyle.inputContainer}

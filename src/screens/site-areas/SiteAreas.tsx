@@ -55,6 +55,7 @@ export default class SiteAreas extends BaseAutoRefreshScreen<Props, State> {
   private currentRegion: Region;
   private mapLimit = 200;
   private listLimit = 25;
+  private mapViewRef: React.RefObject<any>;
 
   public constructor(props: Props) {
     super(props);
@@ -69,6 +70,7 @@ export default class SiteAreas extends BaseAutoRefreshScreen<Props, State> {
       selectedSiteArea: null,
       satelliteMap: false
     };
+    this.mapViewRef = React.createRef();
   }
 
   public setState = (
@@ -141,17 +143,17 @@ export default class SiteAreas extends BaseAutoRefreshScreen<Props, State> {
     }
   }
 
-  public async computeRegion(siteAreas: SiteArea[]): Promise<Region> {
+  public async computeRegion(siteAreas: SiteArea[], locateUser: boolean = false): Promise<Region> {
     // If currentLocation available, use it
     const currentLocation = await Utils.getUserCurrentLocation();
-    /*    if ( currentLocation ) {
+    if (currentLocation || locateUser) {
       return {
         longitude: currentLocation.longitude,
         latitude: currentLocation.latitude,
         longitudeDelta: 0.01,
         latitudeDelta: 0.01
-      }
-    }*/
+      };
+    }
     // Else, use coordinates of the first site area
     if (!Utils.isEmptyArray(siteAreas)) {
       let gpsCoordinates: number[];
@@ -351,7 +353,14 @@ export default class SiteAreas extends BaseAutoRefreshScreen<Props, State> {
     return (
       <SafeAreaView style={style.fabContainer}>
         {showMap && (
-          <TouchableOpacity style={fabStyles.fab} onPress={() => this.setState({ satelliteMap: !satelliteMap })}>
+          <TouchableOpacity
+            style={[fabStyles.fab]}
+            onPress={async () => this.mapViewRef.current?.animateToRegion(await this.computeRegion(true))}>
+            <Icon size={scale(18)} style={fabStyles.fabIcon} as={MaterialIcons} name={'my-location'} />
+          </TouchableOpacity>
+        )}
+        {showMap && (
+          <TouchableOpacity style={[fabStyles.fab, style.fab]} onPress={() => this.setState({ satelliteMap: !satelliteMap })}>
             <Image
               source={satelliteMap ? (isDarkModeEnabled ? standardDarkLayout : standardLightLayout) : satelliteLayout}
               style={[style.imageStyle, satelliteMap && style.outlinedImage] as ImageStyle}
@@ -375,6 +384,7 @@ export default class SiteAreas extends BaseAutoRefreshScreen<Props, State> {
     return (
       <View style={style.map}>
         <ClusterMap<SiteArea>
+          ref={this.mapViewRef}
           items={siteAreasWithGPSCoordinates}
           satelliteMap={satelliteMap}
           renderMarker={(siteArea, index) => (

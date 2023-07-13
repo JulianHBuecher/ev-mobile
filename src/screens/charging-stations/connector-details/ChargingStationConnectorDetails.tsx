@@ -60,6 +60,7 @@ import Cars from '../../cars/Cars';
 import Tags from '../../tags/Tags';
 import Users from '../../users/list/Users';
 import computeStyleSheet from './ChargingStationConnectorDetailsStyles';
+import Reservation from '../../../types/Reservation';
 
 function SocInput(props: { inputProps: TextInputProps; leftText: string; containerStyle?: ViewStyle }) {
   const style = computeStyleSheet();
@@ -250,7 +251,7 @@ export default class ChargingStationConnectorDetails extends BaseAutoRefreshScre
   public getChargingStation = async (chargingStationID: string): Promise<ChargingStation> => {
     try {
       // Get Charger
-      const chargingStation = await this.centralServerProvider.getChargingStation(chargingStationID);
+      const chargingStation = await this.centralServerProvider.getChargingStation(chargingStationID, { WithReservation: true });
       return chargingStation;
     } catch (error) {
       // Other common Error
@@ -436,17 +437,16 @@ export default class ChargingStationConnectorDetails extends BaseAutoRefreshScre
 
   public canReserveNow = (chargingStation: ChargingStation, connector: Connector): boolean => {
     if (connector && connector.status === ChargePointStatus.AVAILABLE) {
-      // return this.securityProvider?.canReserveNow(connector);
+      return this.securityProvider?.canReserveNow(chargingStation?.siteArea);
     }
     return false;
   };
 
   public canCancelReservation = (chargingStation: ChargingStation, connector: Connector): boolean => {
     if (connector && connector.status === ChargePointStatus.RESERVED) {
-      // return this.securityProvider?.canCancelReservation(connector);
+      return this.securityProvider?.canCancelReservation(connector, chargingStation?.siteArea);
     }
-    // return false;
-    return true;
+    return false;
   };
 
   public manualRefresh = async () => {
@@ -863,6 +863,9 @@ export default class ChargingStationConnectorDetails extends BaseAutoRefreshScre
 
   public cancelReservation = async () => {
     const { chargingStation, connector, canCancelReservation } = this.state;
+    if (!canCancelReservation) {
+      Message.showError(I18n.t('general.notAuthorized'));
+    }
     try {
       // Disable button
       this.setState({ buttonDisabled: true });
@@ -1501,33 +1504,45 @@ export default class ChargingStationConnectorDetails extends BaseAutoRefreshScre
   }
 
   private renderReservationButton() {
-    const { chargingStation, connector, selectedUser, selectedTag } = this.state;
+    const { chargingStation, connector, selectedUser, selectedTag, isAdmin, isSiteAdmin, canReserveNow, canCancelReservation } = this.state;
     const { navigation } = this.props;
     const commonColor = Utils.getCurrentCommonColor();
-    let fabStyles;
-    let buttonIcon: string;
-    let screenName: string;
-    let onPressAction;
-    if (connector?.status === ChargePointStatus.RESERVED) {
-      buttonIcon = 'key-remove';
-      fabStyles = computeFabStyles(commonColor.warning);
-      onPressAction = () => this.cancelReservationConfirm();
-    } else if (connector?.status === ChargePointStatus.AVAILABLE) {
-      buttonIcon = 'key';
-      screenName = 'ReserveNow';
-      fabStyles = computeFabStyles();
-      onPressAction = () =>
-        navigation.navigate(screenName, {
-          params: { chargingStation, connector, user: selectedUser, tag: selectedTag }
-        });
-    } else {
-      return;
-    }
+    const fabStyles = computeFabStyles();
+    const style = computeStyleSheet();
+    const connectorIsAvailble = connector.status === ChargePointStatus.AVAILABLE;
     return (
       <SafeAreaView style={fabStyles.fabContainer}>
-        <TouchableOpacity onPress={onPressAction} style={fabStyles.fab}>
-          <Icon style={fabStyles.fabIcon} size={scale(18)} as={MaterialCommunityIcons} name={buttonIcon} />
-        </TouchableOpacity>
+        {this.securityProvider.isComponentReservationActive() && connectorIsAvailble && (isAdmin || isSiteAdmin) && (
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('AddReservation', {
+                chargingStation,
+                connector,
+                user: selectedUser,
+                tag: selectedTag
+              })
+            }
+            style={fabStyles.fab}>
+            <Icon style={fabStyles.fabIcon} size={scale(18)} as={MaterialCommunityIcons} name={'book'} />
+          </TouchableOpacity>
+        )}
+        {connector?.status === ChargePointStatus.RESERVED && canCancelReservation && (isAdmin || isSiteAdmin) && (
+          <TouchableOpacity onPress={() => this.cancelReservationConfirm()} style={[computeFabStyles(commonColor.warning).fab, style.fab]}>
+            <Icon style={fabStyles.fabIcon} size={scale(18)} as={MaterialCommunityIcons} name={'key-remove'} />
+          </TouchableOpacity>
+        )}
+        {!this.securityProvider.isComponentReservationActive() && canReserveNow && (isAdmin || isSiteAdmin) && (
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('ReserveNow', {
+                key: `${Utils.randomNumber()}`,
+                params: { chargingStation, connector, user: selectedUser, tag: selectedTag }
+              })
+            }
+            style={[fabStyles.fab, style.fab]}>
+            <Icon style={fabStyles.fabIcon} size={scale(18)} as={MaterialCommunityIcons} name={'key'} />
+          </TouchableOpacity>
+        )}
       </SafeAreaView>
     );
   }

@@ -57,6 +57,7 @@ interface State {
   refreshing?: boolean;
   isAdmin?: boolean;
   isSiteAdmin?: boolean;
+  alreadyReserved?: boolean;
 }
 
 export interface Props extends BaseProps {}
@@ -84,7 +85,8 @@ export default class AddReservation extends BaseScreen<Props, State> {
       isAdmin: false,
       isSiteAdmin: false,
       sessionContext: null,
-      sessionContextLoading: true
+      sessionContextLoading: true,
+      alreadyReserved: false
     };
   }
 
@@ -92,6 +94,10 @@ export default class AddReservation extends BaseScreen<Props, State> {
     await super.componentDidMount();
     Orientation.lockToPortrait();
     this.currentUser = this.centralServerProvider.getUserInfo();
+    const selectedUser = Utils.getParamFromNavigation(this.props.route, 'user', null) as unknown as User;
+    const selectedTag = Utils.getParamFromNavigation(this.props.route, 'tag', null) as unknown as Tag;
+    const selectedChargingStation = Utils.getParamFromNavigation(this.props.route, 'chargingStation', null) as unknown as ChargingStation;
+    const selectedConnector = Utils.getParamFromNavigation(this.props.route, 'connector', null) as unknown as Connector;
     const currentUser = {
       id: this.currentUser?.id,
       firstName: this.currentUser?.firstName,
@@ -100,12 +106,19 @@ export default class AddReservation extends BaseScreen<Props, State> {
       role: this.currentUser.role,
       email: this.currentUser.email
     } as User;
+    const alreadyReserved = selectedConnector?.status === ChargePointStatus.RESERVED;
     this.setState(
       {
-        type: ReservationType.RESERVE_NOW, // as default
-        selectedUser: currentUser.role === UserRole.ADMIN ? null : this.currentUser,
+        type: alreadyReserved ? ReservationType.PLANNED_RESERVATION : ReservationType.RESERVE_NOW, // as default
+        selectedUser: selectedUser ?? (currentUser.role === UserRole.ADMIN ? null : this.currentUser),
+        selectedTag,
+        selectedChargingStation,
+        selectedConnector,
+        fromDate: moment().toDate(),
+        toDate: moment().add(1, 'd').toDate(),
         reservationID: Utils.generateRandomReservationID(),
-        expiryDate: Utils.generateDateWithDelay(0, 1, 0, 0)
+        expiryDate: Utils.generateDateWithDelay(0, 1, 0, 0),
+        alreadyReserved: alreadyReserved ?? false
       },
       async () => await this.loadUserSessionContext()
     );
@@ -128,7 +141,8 @@ export default class AddReservation extends BaseScreen<Props, State> {
       expiryDate,
       fromDate,
       toDate,
-      sessionContextLoading
+      sessionContextLoading,
+      alreadyReserved
     } = this.state;
     const commonColors = Utils.getCurrentCommonColor();
     const style = computeStyleSheet();
@@ -199,8 +213,8 @@ export default class AddReservation extends BaseScreen<Props, State> {
                     issuer: true,
                     WithSite: true,
                     WithSiteArea: true,
-                    toDate: moment().toDate(),
-                    fromDate: moment().add(1, 'd').toDate()
+                    fromDate: this.state.fromDate ?? moment().toDate(),
+                    toDate: this.state.toDate ?? this.state.expiryDate ?? moment().add(1, 'd').toDate()
                   }}
                   navigation={navigation}
                 />
@@ -219,7 +233,7 @@ export default class AddReservation extends BaseScreen<Props, State> {
                 defaultValue={selectedConnector}
                 statusBarTranslucent={true}
                 defaultButtonText={I18n.t('reservations.connectorId')}
-                data={selectedChargingStation?.connectors.filter((connector) => connector.status === ChargePointStatus.AVAILABLE)}
+                data={selectedChargingStation?.connectors}
                 buttonTextAfterSelection={(connector: Connector) => this.buildChargingStationConnectorName(connector)}
                 rowTextForSelection={(connector: Connector) => this.buildChargingStationConnectorName(connector)}
                 buttonStyle={{ ...style.selectField, ...(!selectedConnector ? style.selectFieldDisabled : {}) }}
@@ -300,40 +314,42 @@ export default class AddReservation extends BaseScreen<Props, State> {
               )}
             />
           )}
-          <View style={style.reservationTypeContainer}>
-            <CheckBox
-              containerStyle={formStyle.checkboxContainer}
-              textStyle={formStyle.checkboxText}
-              checked={type === ReservationType.RESERVE_NOW}
-              checkedIcon={<Icon size={scale(25)} color={commonColors.textColor} name="radiobox-marked" as={MaterialCommunityIcons} />}
-              uncheckedIcon={<Icon size={scale(25)} color={commonColors.textColor} name="radiobox-blank" as={MaterialCommunityIcons} />}
-              onPress={() =>
-                this.setState({
-                  type: ReservationType.RESERVE_NOW,
-                  expiryDate: moment().add(1, 'h').toDate(),
-                  fromDate: null,
-                  toDate: null
-                })
-              }
-              title={I18n.t('reservations.types.reserve_now')}
-            />
-            <CheckBox
-              containerStyle={formStyle.checkboxContainer}
-              textStyle={formStyle.checkboxText}
-              checked={type === ReservationType.PLANNED_RESERVATION}
-              checkedIcon={<Icon size={scale(25)} color={commonColors.textColor} name="radiobox-marked" as={MaterialCommunityIcons} />}
-              uncheckedIcon={<Icon size={scale(25)} color={commonColors.textColor} name="radiobox-blank" as={MaterialCommunityIcons} />}
-              onPress={() =>
-                this.setState({
-                  type: ReservationType.PLANNED_RESERVATION,
-                  expiryDate: null,
-                  fromDate: moment().toDate(),
-                  toDate: moment().add(1, 'h').toDate()
-                })
-              }
-              title={I18n.t('reservations.types.planned_reservation')}
-            />
-          </View>
+          {!alreadyReserved && (
+            <View style={style.reservationTypeContainer}>
+              <CheckBox
+                containerStyle={formStyle.checkboxContainer}
+                textStyle={formStyle.checkboxText}
+                checked={type === ReservationType.RESERVE_NOW}
+                checkedIcon={<Icon size={scale(25)} color={commonColors.textColor} name="radiobox-marked" as={MaterialCommunityIcons} />}
+                uncheckedIcon={<Icon size={scale(25)} color={commonColors.textColor} name="radiobox-blank" as={MaterialCommunityIcons} />}
+                onPress={() =>
+                  this.setState({
+                    type: ReservationType.RESERVE_NOW,
+                    expiryDate: moment().add(1, 'h').toDate(),
+                    fromDate: null,
+                    toDate: null
+                  })
+                }
+                title={I18n.t('reservations.types.reserve_now')}
+              />
+              <CheckBox
+                containerStyle={formStyle.checkboxContainer}
+                textStyle={formStyle.checkboxText}
+                checked={type === ReservationType.PLANNED_RESERVATION}
+                checkedIcon={<Icon size={scale(25)} color={commonColors.textColor} name="radiobox-marked" as={MaterialCommunityIcons} />}
+                uncheckedIcon={<Icon size={scale(25)} color={commonColors.textColor} name="radiobox-blank" as={MaterialCommunityIcons} />}
+                onPress={() =>
+                  this.setState({
+                    type: ReservationType.PLANNED_RESERVATION,
+                    expiryDate: null,
+                    fromDate: moment().toDate(),
+                    toDate: moment().add(1, 'h').toDate()
+                  })
+                }
+                title={I18n.t('reservations.types.planned_reservation')}
+              />
+            </View>
+          )}
           <Button
             title={I18n.t('reservations.create.title')}
             titleStyle={formStyle.buttonTitle}
@@ -389,7 +405,7 @@ export default class AddReservation extends BaseScreen<Props, State> {
             })
           );
           const routes = this.props.navigation.getState().routes;
-          this.props.navigation.navigate(routes[Math.max(0, routes.length - 2)].name, { refresh: true });
+          this.props.navigation.navigate('Reservations', { refresh: true });
           return;
         } else {
           // Show message
@@ -449,7 +465,13 @@ export default class AddReservation extends BaseScreen<Props, State> {
     let valid = false;
     if (type === ReservationType.RESERVE_NOW) {
       valid =
-        !!reservationID && !!selectedChargingStation && !!selectedConnector && !!selectedUser && !!selectedTag && !!expiryDate && !!type;
+        !!reservationID &&
+        !!selectedChargingStation &&
+        !!selectedConnector &&
+        !!selectedUser &&
+        !!selectedTag &&
+        this.checkDate(expiryDate) &&
+        !!type;
     } else {
       valid =
         !!reservationID &&
@@ -457,8 +479,7 @@ export default class AddReservation extends BaseScreen<Props, State> {
         !!selectedConnector &&
         !!selectedUser &&
         !!selectedTag &&
-        !!fromDate &&
-        !!toDate &&
+        this.checkDateRange(fromDate, toDate) &&
         !!type;
     }
     return valid;
@@ -611,9 +632,6 @@ export default class AddReservation extends BaseScreen<Props, State> {
 
   private onUserSelected(selectedUsers: User[]): void {
     const selectedUser = selectedUsers?.[0];
-    // Reset errors and selected fields when new user selected
-    this.tagModalRef?.current?.resetInput();
-    this.carModalRef?.current?.resetInput();
     this.setState(
       {
         selectedUser,
@@ -632,9 +650,9 @@ export default class AddReservation extends BaseScreen<Props, State> {
     if (!connector) {
       return '-';
     }
-    connectorName += Utils.getConnectorLetterFromConnectorID(connector.connectorId);
+    connectorName += `${I18n.t('reservations.connectorId')} ${Utils.getConnectorLetterFromConnectorID(connector.connectorId)}`;
     if (connector?.type && connector?.status) {
-      connectorName += ` - ${Utils.translateConnectorType(connector?.type)} - ${Utils.translateConnectorStatus(connector?.status)}`;
+      connectorName += ` - ${Utils.translateConnectorType(connector?.type)}`;
     }
     if (connector?.amperage > 0) {
       connectorName += ` - ${connector.amperage} A`;

@@ -362,6 +362,11 @@ function ChargingStationsNavigator(props: BaseProps) {
         component={ReportError}
         initialParams={{ ...(props?.route?.params?.params || {}), canOpenDrawer: false }}
       />
+      <ChargingStationsStack.Screen
+        name="AddReservation"
+        component={AddReservation}
+        initialParams={{ ...(props?.route?.params?.params || {}), canOpenDrawer: false }}
+      />
     </ChargingStationsStack.Navigator>
   );
 }
