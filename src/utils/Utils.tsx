@@ -45,6 +45,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Icon } from 'native-base';
 import { HTTPError } from '../types/HTTPError';
+import { ActionResponse } from '../types/ActionResponse';
 
 export default class Utils {
   public static async getEndpointClouds(): Promise<EndpointCloud[]> {
@@ -1172,8 +1173,8 @@ export default class Utils {
     return Math.floor(Math.random() * 1000000000 + 1);
   }
 
-  public static handleReservationResponses(error: Response) {
-    switch (error.status) {
+  public static handleReservationResponses(response: ActionResponse) {
+    switch (Number(response.status)) {
       case HTTPError.RESERVATION_ALREADY_EXISTS_ERROR:
         Message.showError('reservations.action_error.general.already_exists');
         break;

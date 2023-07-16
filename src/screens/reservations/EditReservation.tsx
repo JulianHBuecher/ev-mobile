@@ -405,7 +405,7 @@ export default class EditReservation extends BaseScreen<Props, State> {
           return;
         } else {
           // Show message
-          Message.showError(I18n.t('reservations.update.error'));
+          Utils.handleReservationResponses(response);
         }
       } catch (error) {
         // Enable the button
@@ -461,7 +461,13 @@ export default class EditReservation extends BaseScreen<Props, State> {
     let valid = false;
     if (type === ReservationType.RESERVE_NOW) {
       valid =
-        !!reservationID && !!selectedChargingStation && !!selectedConnector && !!selectedUser && !!selectedTag && !!expiryDate && !!type;
+        !!reservationID &&
+        !!selectedChargingStation &&
+        !!selectedConnector &&
+        !!selectedUser &&
+        !!selectedTag &&
+        this.checkDate(expiryDate) &&
+        !!type;
     } else {
       valid =
         !!reservationID &&
@@ -469,8 +475,7 @@ export default class EditReservation extends BaseScreen<Props, State> {
         !!selectedConnector &&
         !!selectedUser &&
         !!selectedTag &&
-        !!fromDate &&
-        !!toDate &&
+        this.checkDateRange(fromDate, toDate) &&
         !!type;
     }
     return valid;
@@ -644,9 +649,9 @@ export default class EditReservation extends BaseScreen<Props, State> {
     if (!connector) {
       return '-';
     }
-    connectorName += Utils.getConnectorLetterFromConnectorID(connector.connectorId);
+    connectorName += `${I18n.t('reservations.connectorId')} ${Utils.getConnectorLetterFromConnectorID(connector.connectorId)}`;
     if (connector?.type && connector?.status) {
-      connectorName += ` - ${Utils.translateConnectorType(connector?.type)} - ${Utils.translateConnectorStatus(connector?.status)}`;
+      connectorName += ` - ${Utils.translateConnectorType(connector?.type)}`;
     }
     if (connector?.amperage > 0) {
       connectorName += ` - ${connector.amperage} A`;

@@ -404,12 +404,11 @@ export default class AddReservation extends BaseScreen<Props, State> {
               reservationID
             })
           );
-          const routes = this.props.navigation.getState().routes;
           this.props.navigation.navigate('Reservations', { refresh: true });
           return;
         } else {
           // Show message
-          Message.showError(I18n.t('reservations.create.error'));
+          Utils.handleReservationResponses(response);
         }
       } catch (error) {
         // Enable the button

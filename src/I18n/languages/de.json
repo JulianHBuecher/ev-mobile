@@ -89,7 +89,8 @@
     "userOrTenantUpdated": "Sie wurden ausgeloggt, weil entweder Ihre Einstellungen oder die Ihrer Organisation aktualisiert wurden",
     "tenantRedirectionInvalidDomain": "Ungültige Tenant Redirection Domain",
     "from": "Von",
-    "to": "Bis"
+    "to": "Bis",
+    "notification": "Benachrichtigung"
   },
   "sidebar": {
     "home": "Home",
