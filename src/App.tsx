@@ -8,6 +8,7 @@ import { Icon, NativeBaseProvider } from 'native-base';
 import React, { useEffect, useState } from 'react';
 import { Appearance, ColorSchemeName, NativeEventSubscription, StatusBar, Text } from 'react-native';
 import { scale } from 'react-native-size-matters';
+import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
 
 import DeepLinkingManager from './deeplinking/DeepLinkingManager';
 import I18nManager from './I18n/I18nManager';
@@ -824,12 +825,48 @@ export default class App extends React.Component<Props, State> {
       prefixes: DeepLinkingManager.getAuthorizedURLs(),
       getInitialURL: () => this.initialUrl,
       subscribe: (listener) => {
+        const removeOnMessageListener = messaging().onMessage(async (remoteMessage: Notification) => {
+          const canHandleNotification = await Notifications.canHandleNotificationOpenedApp(remoteMessage);
+          await notifee.displayNotification({
+            id: remoteMessage.messageId,
+            title: remoteMessage.notification.title,
+            body: remoteMessage.notification.body,
+            android: {
+              ...remoteMessage.notification.android,
+              channelId: 'fcm_notifications',
+              pressAction: { id: 'default' },
+              importance: AndroidImportance.HIGH
+            },
+            ios: { badgeCount: 0 }
+          });
+          notifee.onForegroundEvent(({ type }) => {
+            if (type === EventType.PRESS) {
+              if (canHandleNotification) {
+                this.setState({ isSignedIn: true }, () => listener(remoteMessage.data.deepLink));
+              }
+            }
+          });
+        });
         // Listen for background notifications when the app is running,
         const removeBackgroundNotificationListener = messaging().onNotificationOpenedApp(async (remoteMessage: Notification) => {
           const canHandleNotification = await Notifications.canHandleNotificationOpenedApp(remoteMessage);
           if (canHandleNotification) {
             this.setState({ isSignedIn: true }, () => listener(remoteMessage.data.deepLink));
           }
+          const notificationId = await notifee.displayNotification({
+            id: remoteMessage.messageId,
+            title: remoteMessage.notification.title,
+            body: remoteMessage.notification.body,
+            android: {
+              ...remoteMessage.notification.android,
+              channelId: 'fcm_notifications',
+              pressAction: { id: 'default' },
+              importance: AndroidImportance.HIGH
+            },
+            ios: { badgeCount: 0 }
+          });
+          await notifee.cancelNotification(notificationId);
+          notifee.onBackgroundEvent(async () => {});
         });
         // Listen for FCM token refresh event
         const removeTokenRefreshEventListener = messaging().onTokenRefresh((token) => {
@@ -838,6 +875,7 @@ export default class App extends React.Component<Props, State> {
         return () => {
           removeBackgroundNotificationListener();
           removeTokenRefreshEventListener();
+          removeOnMessageListener();
         };
       },
       config: {
@@ -866,7 +904,8 @@ export default class App extends React.Component<Props, State> {
                 screens: {
                   TransactionsHistory: `${DeepLinkingManager.PATH_TRANSACTIONS}/${DeepLinkingManager.FRAGMENT_HISTORY}`
                 }
-              }
+              },
+              ReservationsNavigator: DeepLinkingManager.PATH_RESERVATIONS
             }
           }
         }
