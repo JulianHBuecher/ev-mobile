@@ -404,7 +404,8 @@ export default class AddReservation extends BaseScreen<Props, State> {
               reservationID
             })
           );
-          this.props.navigation.navigate('Reservations', { refresh: true });
+          const routes = this.props.navigation.getState().routes;
+          this.props.navigation.navigate(routes[Math.max(0, routes.length - 2)].name, { refresh: true });
           return;
         } else {
           // Show message

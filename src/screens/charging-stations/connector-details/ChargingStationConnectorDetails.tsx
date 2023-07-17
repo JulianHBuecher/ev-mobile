@@ -60,7 +60,6 @@ import Cars from '../../cars/Cars';
 import Tags from '../../tags/Tags';
 import Users from '../../users/list/Users';
 import computeStyleSheet from './ChargingStationConnectorDetailsStyles';
-import Reservation from '../../../types/Reservation';
 
 function SocInput(props: { inputProps: TextInputProps; leftText: string; containerStyle?: ViewStyle }) {
   const style = computeStyleSheet();
@@ -1509,10 +1508,10 @@ export default class ChargingStationConnectorDetails extends BaseAutoRefreshScre
     const commonColor = Utils.getCurrentCommonColor();
     const fabStyles = computeFabStyles();
     const style = computeStyleSheet();
-    const connectorIsAvailble = connector.status === ChargePointStatus.AVAILABLE;
+    const connectorIsAvailble = connector.status !== ChargePointStatus.UNAVAILABLE;
     return (
       <SafeAreaView style={fabStyles.fabContainer}>
-        {this.securityProvider.isComponentReservationActive() && connectorIsAvailble && (isAdmin || isSiteAdmin) && (
+        {((this.securityProvider.isComponentReservationActive() && connectorIsAvailble) || isAdmin || isSiteAdmin) && (
           <TouchableOpacity
             onPress={() =>
               navigation.navigate('AddReservation', {
@@ -1526,12 +1525,12 @@ export default class ChargingStationConnectorDetails extends BaseAutoRefreshScre
             <Icon style={fabStyles.fabIcon} size={scale(18)} as={MaterialCommunityIcons} name={'book'} />
           </TouchableOpacity>
         )}
-        {connector?.status === ChargePointStatus.RESERVED && canCancelReservation && (isAdmin || isSiteAdmin) && (
+        {((connector?.status === ChargePointStatus.RESERVED && canCancelReservation) || isAdmin || isSiteAdmin) && (
           <TouchableOpacity onPress={() => this.cancelReservationConfirm()} style={[computeFabStyles(commonColor.warning).fab, style.fab]}>
             <Icon style={fabStyles.fabIcon} size={scale(18)} as={MaterialCommunityIcons} name={'key-remove'} />
           </TouchableOpacity>
         )}
-        {!this.securityProvider.isComponentReservationActive() && canReserveNow && (isAdmin || isSiteAdmin) && (
+        {((!this.securityProvider.isComponentReservationActive() && canReserveNow) || isAdmin || isSiteAdmin) && (
           <TouchableOpacity
             onPress={() =>
               navigation.navigate('ReserveNow', {
