@@ -34,16 +34,6 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
     carPlaceholderContainer: {
       backgroundColor: commonColor.listItemBackground
     },
-    inputContainer: {
-      borderBottomColor: commonColor.textColor,
-      borderBottomWidth: 0.7,
-      marginLeft: 0,
-      paddingBottom: 0
-    },
-    inputContainerDisabled: {
-      borderBottomWidth: 1,
-      borderBottomColor: commonColor.disabledDark
-    },
     selectField: {
       width: '100%',
       height: 'auto',
@@ -77,58 +67,6 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
       paddingLeft: 0,
       fontSize: '14@s'
     },
-    text: {
-      color: commonColor.textColor,
-      fontSize: '14@s'
-    },
-    model: {
-      marginLeft: '3@s',
-      color: commonColor.disabledDark
-    },
-    errorText: {
-      color: commonColor.dangerLight
-    },
-    inputLabel: {
-      color: commonColor.textColor,
-      fontSize: '16@s'
-    },
-    disabledInputLabel: {
-      color: commonColor.disabledDark
-    },
-    buttonContainer: {
-      width: '95%',
-      marginVertical: '20@s'
-    },
-    buttonDisabled: {
-      backgroundColor: commonColor.primary,
-      borderColor: commonColor.primary,
-      opacity: 0.4
-    },
-    buttonText: {
-      color: commonColor.light
-    },
-    defaultContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'flex-start',
-      width: '95%',
-      marginTop: '15@s',
-      marginBottom: '10@s'
-    },
-    typeContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'flex-start',
-      width: '95%',
-      marginBottom: '5@s'
-    },
-    defaultCheckbox: {
-      marginRight: '15@s',
-      color: commonColor.containerBgColor,
-      borderColor: commonColor.textColor,
-      backgroundColor: commonColor.textColor,
-      marginLeft: 0
-    },
     reservationTypeContainer: {
       width: '100%',
       marginVertical: '10@s'
@@ -136,11 +74,6 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
     radioButton: {
       marginRight: '15@s',
       borderColor: commonColor.textColor
-    },
-    switch: {
-      marginRight: '15@s',
-      color: 'red',
-      transform: Platform.OS === PLATFORM.IOS ? [] : [{ scaleX: moderateScale(1, 3.5) }, { scaleY: moderateScale(1, 3.5) }]
     },
     paddedInputTextContainer: {},
     dropdownIcon: {

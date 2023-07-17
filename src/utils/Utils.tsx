@@ -1173,32 +1173,45 @@ export default class Utils {
     return Math.floor(Math.random() * 1000000000 + 1);
   }
 
-  public static handleReservationResponses(response: ActionResponse) {
-    switch (Number(response.status)) {
+  public static handleReservationResponses(error: any) {
+    let handled = false;
+    switch (error?.response?.status) {
       case HTTPError.RESERVATION_ALREADY_EXISTS_ERROR:
-        Message.showError('reservations.action_error.general.already_exists');
+        Message.showError(I18n.t('reservations.action_error.general.already_exists'));
+        handled = true;
         break;
       case HTTPError.RESERVATION_NOT_SUPPORTED_ERROR:
-        Message.showError('reservations.action_error.general.not_supported');
+        Message.showError(I18n.t('reservations.action_error.general.not_supported'));
+        handled = true;
         break;
       case HTTPError.RESERVATION_REJECTED_ERROR:
-        Message.showError('reservations.action_error.general.rejected');
+        Message.showError(I18n.t('reservations.action_error.general.rejected'));
+        handled = true;
         break;
       case HTTPError.RESERVATION_COLLISION_ERROR:
-        Message.showError('reservations.action_error.general.collision');
+        Message.showError(I18n.t('reservations.action_error.general.collision'));
+        handled = true;
         break;
       case HTTPError.RESERVATION_FAULTED_ERROR:
-        Message.showError('reservations.action_error.general.faulted');
+        Message.showError(I18n.t('reservations.action_error.general.faulted'));
+        handled = true;
         break;
       case HTTPError.RESERVATION_OCCUPIED_ERROR:
-        Message.showError('reservations.action_error.general.occupied');
+        Message.showError(I18n.t('reservations.action_error.general.occupied'));
+        handled = true;
         break;
       case HTTPError.RESERVATION_UNAVAILABLE_ERROR:
-        Message.showError('reservations.action_error.general.unavailable');
+        Message.showError(I18n.t('reservations.action_error.general.unavailable'));
+        handled = true;
         break;
       case HTTPError.RESERVATION_MULTIPLE_RESERVE_NOW_ERROR:
-        Message.showError('reservations.action_error.general.multiple_reserve_now');
+        Message.showError(I18n.t('reservations.action_error.general.multiple_reserve_now'));
+        handled = true;
+        break;
+      default:
+        return handled;
     }
+    return handled;
   }
 
   private static getDeviceLocale(): string {

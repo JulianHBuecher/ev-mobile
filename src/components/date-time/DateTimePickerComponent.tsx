@@ -10,6 +10,7 @@ import { scale } from 'react-native-size-matters';
 import Foundation from 'react-native-vector-icons/Foundation';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import Message from '../../utils/Message';
+import moment from 'moment';
 
 export interface Props {
   title: string;
@@ -101,11 +102,13 @@ export default class DateTimePickerComponent extends React.Component<Props, Stat
 
   private fitDateWithinMinAndMax(date: Date): Date {
     const { maximumDateTime, minimumDateTime } = this.props;
+    const parsedMinDateTime = moment(minimumDateTime);
+    const parsedMaxDateTime = moment(maximumDateTime);
     if (date) {
-      if (minimumDateTime && date < minimumDateTime) {
+      if (!parsedMinDateTime.isValid() && parsedMinDateTime.isAfter(date)) {
         Message.showError(I18n.t('reservations.invalidDateRange'));
         return minimumDateTime;
-      } else if (maximumDateTime && date > maximumDateTime) {
+      } else if (!parsedMaxDateTime.isValid() && parsedMaxDateTime.isBefore(date)) {
         Message.showError(I18n.t('reservations.invalidDateRange'));
         return maximumDateTime;
       }

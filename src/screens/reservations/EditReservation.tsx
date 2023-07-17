@@ -67,9 +67,6 @@ export default class EditReservation extends BaseScreen<Props, State> {
   public props: Props;
   private reservation: Reservation;
   private currentUser: UserToken;
-  private carModalRef = React.createRef<ModalSelect<Car>>();
-  private tagModalRef = React.createRef<ModalSelect<Tag>>();
-  private chargingStationModalRef = React.createRef<ModalSelect<ChargingStation>>();
 
   public constructor(props: Props) {
     super(props);
@@ -185,18 +182,12 @@ export default class EditReservation extends BaseScreen<Props, State> {
               </View>
             </View>
           )}
-          <Input
-            containerStyle={formStyle.inputContainer}
-            inputStyle={formStyle.inputText}
-            inputContainerStyle={[formStyle.inputTextContainer, selectedChargingStation && { paddingLeft: 0 }]}
-            labelStyle={style.inputLabel}
-            renderErrorMessage={false}
-            InputComponent={() => (
+          <View style={[formStyle.inputContainer]}>
+            <View style={[formStyle.inputTextContainer, selectedChargingStation && { paddingLeft: 0 }]}>
               <ModalSelect<ChargingStation>
                 openable={true}
                 disabled={!(!!this.state.expiryDate || (!!this.state.fromDate && !!this.state.toDate))}
                 defaultItems={[selectedChargingStation]}
-                ref={this.chargingStationModalRef}
                 renderItemPlaceholder={() => this.renderChargingStationPlaceholder(style)}
                 renderItem={(chargingStation: ChargingStation) => this.renderChargingStation(style, chargingStation)}
                 onItemsSelected={(chargingStations: ChargingStation[]) => this.onChargingStationSelected(chargingStations?.[0])}
@@ -207,27 +198,22 @@ export default class EditReservation extends BaseScreen<Props, State> {
                     issuer: true,
                     WithSite: true,
                     WithSiteArea: true,
-                    toDate: moment().toDate(),
-                    fromDate: moment().add(1, 'd').toDate()
+                    fromDate: this.state.fromDate ?? moment().toDate(),
+                    toDate: this.state.toDate ?? this.state.expiryDate ?? moment().add(1, 'd').toDate()
                   }}
                   navigation={navigation}
                 />
               </ModalSelect>
-            )}
-          />
-          <Input
-            containerStyle={formStyle.inputContainer}
-            inputStyle={formStyle.inputText}
-            inputContainerStyle={[formStyle.inputTextContainer]}
-            labelStyle={[style.inputLabel, !selectedChargingStation && style.disabledInputLabel]}
-            renderErrorMessage={false}
-            InputComponent={() => (
+            </View>
+          </View>
+          <View style={[formStyle.inputContainer]}>
+            <View style={[formStyle.inputTextContainer, formStyle.inputText]}>
               <SelectDropdown
                 disabled={!selectedChargingStation}
                 defaultValue={selectedConnector}
                 statusBarTranslucent={true}
                 defaultButtonText={I18n.t('reservations.connectorId')}
-                data={selectedChargingStation?.connectors}
+                data={selectedChargingStation?.connectors.filter((connector) => connector.status !== ChargePointStatus.UNAVAILABLE)}
                 buttonTextAfterSelection={(connector: Connector) => this.buildChargingStationConnectorName(connector)}
                 rowTextForSelection={(connector: Connector) => this.buildChargingStationConnectorName(connector)}
                 buttonStyle={{ ...style.selectField, ...(!selectedConnector ? style.selectFieldDisabled : {}) }}
@@ -238,16 +224,11 @@ export default class EditReservation extends BaseScreen<Props, State> {
                 renderDropdownIcon={() => <Icon size={scale(25)} style={style.dropdownIcon} as={MaterialIcons} name={'arrow-drop-down'} />}
                 onSelect={(connector: Connector) => this.setState({ selectedConnector: connector })}
               />
-            )}
-          />
+            </View>
+          </View>
           {this.securityProvider?.canListUsers() && (
-            <Input
-              containerStyle={formStyle.inputContainer}
-              inputStyle={formStyle.inputText}
-              inputContainerStyle={[formStyle.inputTextContainer, selectedUser && { paddingLeft: 0 }]}
-              labelStyle={style.inputLabel}
-              renderErrorMessage={false}
-              InputComponent={() => (
+            <View style={[formStyle.inputContainer]}>
+              <View style={[formStyle.inputTextContainer, selectedUser && { paddingLeft: 0 }]}>
                 <ModalSelect<User>
                   openable={true}
                   disabled={false}
@@ -259,22 +240,16 @@ export default class EditReservation extends BaseScreen<Props, State> {
                   selectionMode={ItemSelectionMode.SINGLE}>
                   <Users filters={{ issuer: true }} navigation={navigation} />
                 </ModalSelect>
-              )}
-            />
+              </View>
+            </View>
           )}
           {this.securityProvider?.canListTags() && (
-            <Input
-              containerStyle={formStyle.inputContainer}
-              inputStyle={formStyle.inputText}
-              inputContainerStyle={[formStyle.inputTextContainer, selectedTag && { paddingLeft: 0 }]}
-              labelStyle={style.inputLabel}
-              renderErrorMessage={false}
-              InputComponent={() => (
+            <View style={[formStyle.inputContainer]}>
+              <View style={[formStyle.inputTextContainer, selectedTag && { paddingLeft: 0 }]}>
                 <ModalSelect<Tag>
                   openable={true}
                   disabled={false}
                   defaultItems={[selectedTag]}
-                  ref={this.tagModalRef}
                   renderItem={(tag: Tag) => this.renderTag(style, tag)}
                   renderItemPlaceholder={() => this.renderTagPlaceholder(style)}
                   onItemsSelected={(tags: Tag[]) => this.setState({ selectedTag: tags?.[0] }, () => void this.loadUserSessionContext())}
@@ -283,22 +258,16 @@ export default class EditReservation extends BaseScreen<Props, State> {
                   selectionMode={ItemSelectionMode.SINGLE}>
                   <Tags disableInactive={true} sorting={'-active'} userIDs={[selectedUser?.id as string]} navigation={navigation} />
                 </ModalSelect>
-              )}
-            />
+              </View>
+            </View>
           )}
           {this.securityProvider?.isComponentCarActive() && (
-            <Input
-              containerStyle={formStyle.inputContainer}
-              inputStyle={formStyle.inputText}
-              inputContainerStyle={[formStyle.inputTextContainer, selectedTag && { paddingLeft: 0 }]}
-              labelStyle={style.inputLabel}
-              renderErrorMessage={false}
-              InputComponent={() => (
+            <View style={[formStyle.inputContainer]}>
+              <View style={[formStyle.inputTextContainer, selectedCar && { paddingLeft: 0 }]}>
                 <ModalSelect<Car>
                   openable={true}
                   disabled={false}
                   defaultItems={[selectedCar]}
-                  ref={this.carModalRef}
                   renderItemPlaceholder={() => this.renderCarPlaceholder(style)}
                   renderItem={(car) => <CarComponent car={car} navigation={navigation} />}
                   onItemsSelected={(cars: Car[]) => this.setState({ selectedCar: cars?.[0] }, () => void this.loadUserSessionContext())}
@@ -307,8 +276,8 @@ export default class EditReservation extends BaseScreen<Props, State> {
                   selectionMode={ItemSelectionMode.SINGLE}>
                   <Cars userIDs={[selectedUser?.id as string]} navigation={navigation} />
                 </ModalSelect>
-              )}
-            />
+              </View>
+            </View>
           )}
           <View style={style.reservationTypeContainer}>
             <CheckBox
@@ -403,13 +372,14 @@ export default class EditReservation extends BaseScreen<Props, State> {
           const routes = this.props.navigation.getState().routes;
           this.props.navigation.navigate(routes[Math.max(0, routes.length - 2)].name, { refresh: true });
           return;
-        } else {
-          // Show message
-          Utils.handleReservationResponses(response);
         }
       } catch (error) {
         // Enable the button
         this.setState({ buttonDisabled: false });
+        // Handle reservation return
+        if (Utils.handleReservationResponses(error)) {
+          return;
+        }
         // Other common Error
         await Utils.handleHttpUnexpectedError(this.centralServerProvider, error, 'reservations.update.error', this.props.navigation);
       }
