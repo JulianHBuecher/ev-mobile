@@ -58,6 +58,7 @@ interface State {
   isAdmin?: boolean;
   isSiteAdmin?: boolean;
   alreadyReserved?: boolean;
+  inUse?: boolean;
 }
 
 export interface Props extends BaseProps {}
@@ -86,7 +87,8 @@ export default class AddReservation extends BaseScreen<Props, State> {
       isSiteAdmin: false,
       sessionContext: null,
       sessionContextLoading: true,
-      alreadyReserved: false
+      alreadyReserved: false,
+      inUse: false
     };
   }
 
@@ -107,9 +109,10 @@ export default class AddReservation extends BaseScreen<Props, State> {
       email: this.currentUser.email
     } as User;
     const alreadyReserved = selectedConnector?.status === ChargePointStatus.RESERVED;
+    const inUse = [ChargePointStatus.CHARGING, ChargePointStatus.OCCUPIED, ChargePointStatus.PREPARING].includes(selectedConnector?.status);
     this.setState(
       {
-        type: alreadyReserved ? ReservationType.PLANNED_RESERVATION : ReservationType.RESERVE_NOW, // as default
+        type: alreadyReserved || inUse ? ReservationType.PLANNED_RESERVATION : ReservationType.RESERVE_NOW, // as default
         selectedUser: selectedUser ?? (currentUser.role === UserRole.ADMIN ? null : this.currentUser),
         selectedTag,
         selectedChargingStation,
@@ -118,7 +121,8 @@ export default class AddReservation extends BaseScreen<Props, State> {
         toDate: moment().add(1, 'd').toDate(),
         reservationID: Utils.generateRandomReservationID(),
         expiryDate: Utils.generateDateWithDelay(0, 1, 0, 0),
-        alreadyReserved: alreadyReserved ?? false
+        alreadyReserved: alreadyReserved ?? false,
+        inUse: inUse ?? false
       },
       async () => await this.loadUserSessionContext()
     );
@@ -142,7 +146,8 @@ export default class AddReservation extends BaseScreen<Props, State> {
       fromDate,
       toDate,
       sessionContextLoading,
-      alreadyReserved
+      alreadyReserved,
+      inUse
     } = this.state;
     const commonColors = Utils.getCurrentCommonColor();
     const style = computeStyleSheet();
@@ -289,7 +294,7 @@ export default class AddReservation extends BaseScreen<Props, State> {
               </View>
             </View>
           )}
-          {!alreadyReserved && (
+          {!alreadyReserved && !inUse && (
             <View style={style.reservationTypeContainer}>
               <CheckBox
                 containerStyle={formStyle.checkboxContainer}

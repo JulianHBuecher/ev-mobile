@@ -186,8 +186,8 @@ export default class Reservations extends SelectableList<Reservation> {
       // Then get next reservations
       const reservations = await this.getReservations(this.searchText, { skip: skip + Constants.PAGING_SIZE, limit });
       // Add reservations
-      this.setState((prevState, props) => ({
-        reservations: [...prevState.reservations, ...reservations.result],
+      this.setState((prevState) => ({
+        reservations: reservations ? [...prevState.reservations, ...reservations.result] : prevState.reservations,
         skip: prevState.skip + Constants.PAGING_SIZE,
         refreshing: false
       }));
@@ -234,10 +234,9 @@ export default class Reservations extends SelectableList<Reservation> {
           <View style={style.content}>
             <ItemsList<Reservation>
               data={reservations}
-              ref={this.itemsListRef}
               skip={skip}
               count={count}
-              onEndReached={this.onEndScroll}
+              limit={limit}
               renderItem={(item: Reservation, selected: boolean) => (
                 <ReservationComponent
                   navigation={navigation}
@@ -250,10 +249,10 @@ export default class Reservations extends SelectableList<Reservation> {
                 />
               )}
               manualRefresh={this.manualRefresh.bind(this)}
+              onEndReached={this.onEndScroll}
               refreshing={refreshing}
               emptyTitle={I18n.t('reservations.noReservations')}
               navigation={navigation}
-              limit={limit}
             />
           </View>
         )}

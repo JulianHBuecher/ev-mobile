@@ -865,7 +865,6 @@ export default class App extends React.Component<Props, State> {
             },
             ios: { badgeCount: 0 }
           });
-          await notifee.cancelNotification(notificationId);
           notifee.onBackgroundEvent(async () => {});
         });
         // Listen for FCM token refresh event
