@@ -113,6 +113,7 @@ export default class Reservations extends SelectableList<Reservation> {
         StartDateTime: fromDateTime,
         EndDateTime: toDateTime,
         WithChargingStation: true,
+        WithSite: true,
         WithSiteArea: true,
         WithTag: true,
         WithUser: true,
@@ -152,11 +153,15 @@ export default class Reservations extends SelectableList<Reservation> {
         // Refresh all
         const reservations = await this.getReservations(this.searchText, { skip: 0, limit: skip + limit });
         const reservationsFromDates =
-          reservations.result > 0 ? reservations.result.map((reservation) => moment(reservation.fromDate).toDate()) : [moment().toDate()];
+          reservations.result.length > 0
+            ? reservations.result.map((reservation) => moment(reservation.fromDate).toDate())
+            : [moment().toDate()];
         const reservationsToDates =
-          reservations.result > 0 ? reservations.result.map((reservation) => moment(reservation.toDate).toDate()) : [moment().toDate()];
+          reservations.result.length > 0
+            ? reservations.result.map((reservation) => moment(reservation.toDate).toDate())
+            : [moment().toDate()];
         const reservationsMinFromDate = new Date(Math.min(...reservationsFromDates));
-        const reservationsMaxToDate = new Date(Math.min(...reservationsToDates));
+        const reservationsMaxToDate = new Date(Math.max(...reservationsToDates));
         // Set Reservations
         this.setState({
           loading: false,
