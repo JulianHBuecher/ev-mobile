@@ -71,14 +71,18 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
       width: '100%',
       marginVertical: '10@s'
     },
-    radioButton: {
-      marginRight: '15@s',
-      borderColor: commonColor.textColor
-    },
     paddedInputTextContainer: {},
     dropdownIcon: {
       color: commonColor.textColor
-    }
+    },
+    defaultContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-start',
+      width: '95%',
+      marginBottom: '20@s'
+    },
+    twoItemsContainer: { width: '100%', flexDirection: 'row', justifyContent: 'space-around' }
   });
   const portraitStyles = {};
   const landscapeStyles = {};

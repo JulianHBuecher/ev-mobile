@@ -1176,7 +1176,7 @@ export default class CentralServerProvider {
   }
 
   public async cancelReservation(reservation: Reservation): Promise<ActionResponse> {
-    this.debugMethod('updateReservation');
+    this.debugMethod('cancelReservation');
     const body = {
       args: {
         chargingStationID: reservation.chargingStationID,

@@ -16,6 +16,22 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
       margin: 0,
       padding: '5@s'
     },
+    dateContainer: {
+      height: '70@s',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      flexDirection: 'row',
+      margin: 0,
+      padding: '5@s'
+    },
+    timeContainer: {
+      height: '60@s',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      flexDirection: 'row',
+      margin: 0,
+      padding: '5@s'
+    },
     contentContainer: {
       height: '100%',
       justifyContent: 'center',
@@ -44,6 +60,15 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
       flexDirection: 'row',
       alignItems: 'center',
       width: '100%'
+    },
+    defaultDateIcon: {
+      color: commonColor.disabled
+    },
+    validDateIcon: {
+      color: commonColor.success
+    },
+    invalidDateIcon: {
+      color: commonColor.danger
     }
   });
   const portraitStyles = {};

@@ -22,6 +22,8 @@ import DialogModal from '../../../components/modal/DialogModal';
 import computeModalCommonStyle from '../../../components/modal/ModalCommonStyle';
 import computeFabStyles from '../../../components/fab/FabComponentStyles';
 import BaseAutoRefreshScreen from '../../../screens/base-screen/BaseAutoRefreshScreen';
+import SiteArea from '../../../types/SiteArea';
+import Site from '../../../types/Site';
 
 export interface Props extends BaseProps {}
 
@@ -73,25 +75,25 @@ export default class ReservationDetails extends BaseAutoRefreshScreen<Props, Sta
   public async componentDidMount() {
     await super.componentDidMount();
     let siteAreaImage: string = null;
-    let siteAreaID: string = null;
-    let siteID: string = null;
+    let siteArea: SiteArea = null;
+    let site: Site = null;
     const reservationID = Utils.getParamFromNavigation(this.props.route, 'reservationID', null) as number;
     const reservation = await this.getReservation(reservationID);
     if (reservation && reservation.chargingStation.siteAreaID && this.isMounted()) {
       siteAreaImage = await this.getSiteAreaImage(reservation.chargingStation.siteAreaID);
     }
-    siteAreaID = reservation.chargingStation.siteAreaID ?? null;
-    siteID = reservation.chargingStation.siteID ?? null;
+    siteArea = reservation.chargingStation.siteArea ?? null;
+    site = reservation.chargingStation.site ?? null;
     this.setState({
       reservation,
       loading: false,
       siteAreaImage,
       isAdmin: this.securityProvider ? this.securityProvider.isAdmin() : false,
-      isSiteAdmin: this.securityProvider && reservation && siteAreaID ? this.securityProvider.isSiteAdmin(siteID) : false,
+      isSiteAdmin: this.securityProvider && reservation && siteArea ? this.securityProvider.isSiteAdmin(site.id as string) : false,
       isCarActive: this.securityProvider.isComponentCarActive(),
       isSmartChargingActive: this.securityProvider.isComponentSmartCharging(),
-      canCancelReservation: reservation ? this.canCancelReservation(reservation) : false,
-      canDeleteReservation: reservation ? this.canDeleteReservation(reservation) : false
+      canCancelReservation: reservation ? this.securityProvider.canCancelReservation(reservation, siteArea) : false,
+      canDeleteReservation: reservation ? this.securityProvider.canDeleteReservation(reservation, siteArea) : false
     });
   }
 
@@ -102,6 +104,7 @@ export default class ReservationDetails extends BaseAutoRefreshScreen<Props, Sta
         WithTag: true,
         WithUser: true,
         WithSiteArea: true,
+        WithSite: true,
         WithCar: true
       });
       return reservation;
@@ -214,17 +217,28 @@ export default class ReservationDetails extends BaseAutoRefreshScreen<Props, Sta
     );
   };
 
+  public renderReservedSlot = (style: any) => {
+    const { reservation } = this.state;
+    return (
+      <View style={style.columnContainer}>
+        <Icon size={scale(25)} as={MaterialCommunityIcons} name="book-clock" style={[style.icon, style.info]} />
+        <Text numberOfLines={2} adjustsFontSizeToFit={true} style={[style.label, style.labelValue, style.info]}>
+          {I18nManager.formatDateTime(reservation.arrivalTime, { timeStyle: 'short' })} -{'\n'}
+          {I18nManager.formatDateTime(reservation.departureTime, { timeStyle: 'short' })}
+        </Text>
+      </View>
+    );
+  };
+
   public render() {
     const style = computeStyleSheet();
-    const { reservation } = this.state;
     const {
+      reservation,
       loading,
       siteAreaImage,
       isSmartChargingActive,
       isCarActive,
-      canCancelReservation,
       showCancelReservationDialog,
-      canDeleteReservation,
       showDeleteReservationDialog
     } = this.state;
     const connectorLetter = Utils.getConnectorLetterFromConnectorID(reservation ? reservation.connectorID : null);
@@ -248,19 +262,24 @@ export default class ReservationDetails extends BaseAutoRefreshScreen<Props, Sta
           <View style={style.imageInnerContainer}>
             {/* Provide better icon alignment */}
             <View style={[style.justifyContentContainer]} />
-            {canCancelReservation ? (
-              <View style={style.reservationContainer}>{this.renderCancelReservationButton(style)}</View>
-            ) : (
-              <View style={style.noButtonCancelReservation} />
-            )}
-            {canDeleteReservation && this.renderDeleteReservationButton(style)}
+            {this.renderCancelReservationButton(style)}
+            {this.renderDeleteReservationButton(style)}
           </View>
         </ImageBackground>
         <View style={style.headerContent}>
           <View style={style.headerRowContainer}>
             <Text style={style.headerName}>
-              {reservation ? I18nManager.formatDateTime(reservation.fromDate, { dateStyle: 'short', timeStyle: 'short' }) : ''} -
-              {reservation ? I18nManager.formatDateTime(reservation.toDate, { dateStyle: 'short', timeStyle: 'short' }) : ''}
+              {reservation
+                ? I18nManager.formatDateTime(reservation.fromDate, {
+                    dateStyle: 'medium'
+                  })
+                : ''}{' '}
+              -{' '}
+              {reservation
+                ? I18nManager.formatDateTime(reservation.toDate, {
+                    dateStyle: 'medium'
+                  })
+                : ''}
             </Text>
             {reservation?.createdBy.id !== reservation?.tag?.userID && (
               <Text style={style.subHeaderName}>
@@ -271,61 +290,55 @@ export default class ReservationDetails extends BaseAutoRefreshScreen<Props, Sta
           </View>
         </View>
         {/* Edit Button */}
-        {this.renderEditReservationButton()}
+        {reservation.canUpdate && this.renderEditReservationButton()}
         <ScrollView style={style.scrollViewContainer} contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap' }}>
           {this.renderUserInfo(style)}
           {this.renderReservationStatus(style)}
           {this.renderReservationType(style)}
           {this.renderChargingStation(style)}
           {this.renderChargingStationConnector(style)}
+          {this.renderReservedSlot(style)}
           {isCarActive && this.renderCar(style)}
         </ScrollView>
       </View>
     );
   }
 
-  public canCancelReservation = (reservation: Reservation): boolean =>
-    // if (connector && connector.status === ChargePointStatus.RESERVED) {
-    //   // return this.securityProvider?.canCancelReservation(connector);
-    // }
-    // return false;
-    true;
-
-  public canDeleteReservation = (reservation: Reservation): boolean =>
-    // if (connector && connector.status === ChargePointStatus.RESERVED) {
-    //   // return this.securityProvider?.canCancelReservation(connector);
-    // }
-    // return false;
-    true;
-
   public renderCancelReservationButton = (style: any) => {
     const isDisabled = this.isButtonDisabled();
-    return (
-      <TouchableOpacity disabled={isDisabled} onPress={() => this.cancelReservationConfirm()}>
-        <View
-          style={
-            isDisabled
-              ? [style.buttonReservation, style.cancelReservation, style.buttonReservationDisabled]
-              : [style.buttonReservation, style.cancelReservation]
-          }>
-          <Icon
-            style={
-              isDisabled
-                ? [style.reservationIcon, style.cancelReservationIcon, style.reservationDisabledIcon]
-                : [style.reservationIcon, style.cancelReservationIcon]
-            }
-            as={MaterialCommunityIcons}
-            size={scale(75)}
-            name="key-remove"
-          />
+    const { canCancelReservation } = this.state;
+    if (canCancelReservation) {
+      return (
+        <View style={style.reservationContainer}>
+          <TouchableOpacity disabled={isDisabled} onPress={() => this.cancelReservationConfirm()}>
+            <View
+              style={
+                isDisabled
+                  ? [style.buttonReservation, style.cancelReservation, style.buttonReservationDisabled]
+                  : [style.buttonReservation, style.cancelReservation]
+              }>
+              <Icon
+                style={
+                  isDisabled
+                    ? [style.reservationIcon, style.cancelReservationIcon, style.reservationDisabledIcon]
+                    : [style.reservationIcon, style.cancelReservationIcon]
+                }
+                as={MaterialCommunityIcons}
+                size={scale(75)}
+                name="key-remove"
+              />
+            </View>
+          </TouchableOpacity>
         </View>
-      </TouchableOpacity>
-    );
+      );
+    } else {
+      <View style={style.noButtonCancelReservation} />;
+    }
   };
 
   public renderDeleteReservationButton = (style: any) => {
-    const { isAdmin, isSiteAdmin } = this.state;
-    if (isAdmin || isSiteAdmin) {
+    const { canDeleteReservation } = this.state;
+    if (canDeleteReservation) {
       return (
         <TouchableOpacity style={style.deleteReservationContainer} onPress={() => this.deleteReservationConfirm()}>
           <View style={style.deleteReservationButton}>
@@ -349,20 +362,21 @@ export default class ReservationDetails extends BaseAutoRefreshScreen<Props, Sta
   public async refresh(showSpinner = false, callback: () => void = () => {}): Promise<void> {
     const newState = showSpinner ? { refreshing: true } : this.state;
     this.setState(newState, async () => {
-      const siteAreaImage = this.state.siteAreaImage;
+      let siteAreaImage = this.state.siteAreaImage;
       const reservationID = Utils.getParamFromNavigation(this.props.route, 'reservationID', null) as number;
       const reservation = await this.getReservation(reservationID, {
         WithChargingStation: true,
         WithTag: true,
         WithUser: true,
         WithSiteArea: true,
+        WithSite: true,
         WithCar: true
       });
       if (!siteAreaImage && reservation.chargingStation?.siteAreaID) {
         siteAreaImage = await this.getSiteAreaImage(reservation?.chargingStation?.siteAreaID);
       }
-      const siteAreaID = reservation.chargingStation.siteAreaID ?? null;
-      const siteID = reservation.chargingStation.siteID ?? null;
+      const siteArea = reservation.chargingStation.siteArea ?? null;
+      const site = reservation.chargingStation.site ?? null;
       this.setState(
         {
           reservation,
@@ -370,11 +384,11 @@ export default class ReservationDetails extends BaseAutoRefreshScreen<Props, Sta
           refreshing: false,
           siteAreaImage,
           isAdmin: this.securityProvider ? this.securityProvider.isAdmin() : false,
-          isSiteAdmin: this.securityProvider && reservation && siteAreaID ? this.securityProvider.isSiteAdmin(siteID) : false,
+          isSiteAdmin: this.securityProvider && reservation && siteArea ? this.securityProvider.isSiteAdmin(site.id) : false,
           isCarActive: this.securityProvider.isComponentCarActive(),
           isSmartChargingActive: this.securityProvider.isComponentSmartCharging(),
-          canCancelReservation: reservation ? this.canCancelReservation(reservation) : false,
-          canDeleteReservation: reservation ? this.canDeleteReservation(reservation) : false
+          canCancelReservation: reservation ? this.securityProvider.canCancelReservation(reservation, siteArea) : false,
+          canDeleteReservation: reservation ? this.securityProvider.canDeleteReservation(reservation, siteArea) : false
         },
         () => callback?.()
       );
@@ -495,7 +509,8 @@ export default class ReservationDetails extends BaseAutoRefreshScreen<Props, Sta
         if (response?.status === RestResponse.SUCCESS) {
           Message.showSuccess(
             I18n.t('reservations.delete.success', {
-              reservationID: reservation.id
+              chargingStationID: reservation.chargingStationID,
+              connectorID: Utils.getConnectorLetterFromConnectorID(reservation.connectorID)
             })
           );
           this.props.navigation.navigate('Reservations', { refresh: true });

@@ -33,6 +33,9 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
     reservationStatusCancelled: {
       backgroundColor: commonColor.danger
     },
+    reservationStatusUnmet: {
+      backgroundColor: commonColor.disabledDark
+    },
     reservationStatusScheduled: {
       backgroundColor: commonColor.info
     },
@@ -78,6 +81,7 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
       justifyContent: 'center',
       alignItems: 'center',
       height: '60@s',
+      flexGrow: 1,
       color: commonColor.textColor
     },
     icon: {

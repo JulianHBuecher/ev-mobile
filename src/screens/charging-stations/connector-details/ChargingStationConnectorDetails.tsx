@@ -1508,7 +1508,7 @@ export default class ChargingStationConnectorDetails extends BaseAutoRefreshScre
     const commonColor = Utils.getCurrentCommonColor();
     const fabStyles = computeFabStyles();
     const style = computeStyleSheet();
-    const connectorIsAvailble = connector.status !== ChargePointStatus.UNAVAILABLE;
+    const connectorIsAvailble = connector?.status ? connector.status !== ChargePointStatus.UNAVAILABLE : false;
     return (
       <SafeAreaView style={fabStyles.fabContainer}>
         {((this.securityProvider.isComponentReservationActive() && connectorIsAvailble) || isAdmin || isSiteAdmin) && (

@@ -20,6 +20,8 @@ import ReservableChargingStationComponent from '../../../components/charging-sta
 export interface ReservableChargingStationsFiltersDef {
   fromDate?: Date;
   toDate?: Date;
+  arrivalTime?: Date;
+  departureTime?: Date;
   issuer?: boolean;
   WithSite?: boolean;
   WithSiteArea?: boolean;
@@ -70,7 +72,9 @@ export default class ReservableChargingStations extends SelectableList<ChargingS
         WithSite: this.props?.filters?.WithSite,
         WithSiteArea: this.props?.filters?.WithSiteArea,
         FromDate: this.props?.filters?.fromDate,
-        ToDate: this.props?.filters?.toDate
+        ToDate: this.props?.filters?.toDate,
+        ArrivalTime: this.props?.filters?.toDate,
+        DepartureTime: this.props?.filters?.toDate
       };
       const chargingStations = await this.centralServerProvider.getReservableChargingStations(params, { skip, limit }, ['id']);
       if (chargingStations?.count === -1) {

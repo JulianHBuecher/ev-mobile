@@ -564,7 +564,7 @@
       "title": "Reservierte Ladestation blockiert",
       "body": "An Ihrer derzeitig reservierten Ladestation '{{chargingStationID}}' an Anschluss '{{connectorID}}' wurde eine Ladevorgang gestartet."
     },
-    "reservationStatusChanged": {
+    "reservationStatusChangedNotification": {
       "title": "Status der Reservierung geändert",
       "body": "Der Status Ihrer Reservierung für die Ladestation '{{chargingStationID}}' an Anschluss '{{connectorID}}' hat sich geändert.",
       "status": {
@@ -574,6 +574,10 @@
         "reservation_cancelled": "Reservierung storniert",
         "reservation_expired": "Reservierung abgelaufen"
       }
+    },
+    "reservationUnmetNotification": {
+      "title": "Reservierung nicht wahrgenommen",
+      "body": "Die Reservierung an der Ladestation '{{chargingStationID}}' an Anschluss '{{connectorID}}' wurde aufgrund Nichterscheinens innerhalb von 15 Minuten nach Start der Reservierung abgebrochen."
     }
   },
   "appUpdate": {
@@ -606,8 +610,10 @@
     "connectorId": "Anschluss",
     "connectorStatus": "Anschluss Verfügbarkeit",
     "expiryDate": "Ablaufdatum",
-    "fromDate": "Gültig ab",
-    "toDate": "Gültig bis",
+    "fromDate": "Von",
+    "toDate": "Bis",
+    "arrivalTime": "Ankunftszeit",
+    "departureTime": "Abfahrtszeit",
     "tagId": "Tag ID",
     "status": "Status",
     "type": "Reservierungs-Typ",
@@ -624,6 +630,7 @@
       "reservation_in_progress": "Laufend",
       "reservation_cancelled": "Storniert",
       "reservation_expired": "Abgelaufen",
+      "reservation_unmet": "Unerfüllt",
       "unknown": "Unbekannt"
     },
     "types": {
@@ -652,7 +659,7 @@
       "tooltips": "Reservierung erstellen",
       "confirm": "",
       "details": "",
-      "success": "'{{reservationID}}' wurde erfolgreich erstellt",
+      "success": "Die Reservierung an Ladestation '{{chargingStationID}}' für Anschluss '{{connectorID}}' wurde erfolgreich erstellt",
       "error": "Beim Erstellen der Reservierung ist ein Fehler aufgetreten"
     },
     "update": {
@@ -660,21 +667,21 @@
       "tooltips": "Reservierung aktualisieren",
       "confirm": "",
       "details": "",
-      "success": "Die Reservierung '{{reservationID}}' wurde erfolgreich gespeichert",
+      "success": "Die Reservierung an Ladestation '{{chargingStationID}}' für Anschluss '{{connectorID}}' wurde erfolgreich aktualisiert",
       "error": "Die Reservierung kann nicht verändert werden, siehe Log-Nachrichten für Details"
     },
     "delete": {
       "title": "Reservierung löschen",
       "tooltips": "Reservierung löschen",
-      "confirm": "Sind Sie sich sicher, dass Sie die Reservierung '{{reservationID}}' löschen wollen?",
+      "confirm": "Sind Sie sich sicher, dass Sie die Reservierung löschen wollen?",
       "details": "",
-      "success": "Die Reservierung '{{reservationID}}' wurde erfolgreich gelöscht",
+      "success": "Die Reservierung an Ladestation '{{chargingStationID}}' für Anschluss '{{connectorID}}' wurde erfolgreich gelöscht",
       "error": "Beim Löschen der Reservierung ist ein Fehler aufgetreten"
     },
     "action_error": {
       "general": {
         "not_found": "Die Reservierung wurde nicht gefunden",
-        "already_exists": "Die Reservierung mit der ID '{{reservationID}}' existiert bereits für einen anderen Nutzer",
+        "already_exists": "Eine Reservierung mit der gleichen ID existiert bereits für einen anderen Nutzer",
         "not_supported": "Das Feature 'Reservierungen' ist für diese Ladestation nicht aktiviert",
         "rejected": "The reservation was rejected",
         "collision": "Die Reservierung kollidiert mit anderen Reservierung(en) für den gewünschten Zeitraum. Wählen Sie ein anderes Zeitfenster aus",

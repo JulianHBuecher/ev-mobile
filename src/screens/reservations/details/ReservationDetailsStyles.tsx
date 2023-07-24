@@ -112,7 +112,7 @@ export default function computeStyleSheet(): StyleSheet.NamedStyles<any> {
       color: commonColor.textColor
     },
     labelValue: {
-      fontSize: '25@s',
+      fontSize: '20@s',
       fontWeight: 'bold',
       color: commonColor.textColor
     },

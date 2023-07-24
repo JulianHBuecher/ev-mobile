@@ -44,8 +44,8 @@ export default class ReservationHeaderComponent extends React.Component<Props, S
       <View style={style.container}>
         <View style={style.firstLine}>
           <Text numberOfLines={1} style={style.reservationTimeRange}>
-            {I18nManager.formatDateTime(reservation.fromDate, { dateStyle: 'short', timeStyle: 'short' })} -{' '}
-            {I18nManager.formatDateTime(reservation.toDate, { dateStyle: 'short', timeStyle: 'short' })}
+            {I18nManager.formatDateTime(reservation.fromDate, { dateStyle: 'short' })} -{' '}
+            {I18nManager.formatDateTime(reservation.toDate, { dateStyle: 'short' })}
           </Text>
           <Icon size={scale(18)} style={style.arrowIcon} as={MaterialCommunityIcons} name="arrow-right-circle-outline" />
         </View>

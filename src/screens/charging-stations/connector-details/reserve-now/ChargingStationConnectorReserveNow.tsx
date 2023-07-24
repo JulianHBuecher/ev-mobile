@@ -285,8 +285,8 @@ export default class ReserveNow extends BaseScreen<Props, State> {
         title={'reservations.expiryDate'}
         locale={locale}
         is24Hour={is24Hour}
-        minimumDateTime={minimumDate}
-        maximumDateTime={maximumDate}
+        lowerBound={minimumDate}
+        upperBound={maximumDate}
         dateTime={expiryDate}
         onDateTimeChanged={(newExpiryDate: Date) => this.setState({ expiryDate: newExpiryDate })}
       />

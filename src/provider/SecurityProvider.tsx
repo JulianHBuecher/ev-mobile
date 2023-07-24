@@ -151,23 +151,36 @@ export default class SecurityProvider {
     return this.canAccess(Entity.RESERVATION, Action.LIST);
   }
 
-  public canReserveNow(siteArea: SiteArea): boolean {
+  public canReserveNow(connector: Connector, siteArea: SiteArea): boolean {
     if (this.canAccess(Entity.CHARGING_STATION, Action.RESERVE_NOW)) {
       if (this.isComponentActive(TenantComponents.ORGANIZATION)) {
         if (!siteArea) {
           return false;
         }
-        return !siteArea.accessControl || this.isSiteAdmin(siteArea.siteID) || this.loggedUser.sites.includes(siteArea.siteID);
+        return this.isSiteAdmin(siteArea.siteID) || this.loggedUser.sites.includes(siteArea.siteID) || connector.canReserveNow;
       }
       return this.isAdmin();
     }
     return false;
   }
 
-  public canCancelReservation(connector: Connector, siteArea: SiteArea): boolean {
-    if (this.canAccess(Entity.CHARGING_STATION, Action.CANCEL_RESERVATION)) {
+  public canCancelReservation(reservation: Reservation, siteArea: SiteArea): boolean {
+    if (
+      this.canAccess(Entity.CHARGING_STATION, Action.CANCEL_RESERVATION) ||
+      this.canAccess(Entity.RESERVATION, Action.CANCEL_RESERVATION)
+    ) {
       if (this.isComponentActive(TenantComponents.ORGANIZATION)) {
-        return connector.canCancelReservation || !siteArea.accessControl || this.isSiteAdmin(siteArea.siteID);
+        return this.isSiteAdmin(siteArea.siteID) || reservation.canCancelReservation;
+      }
+      return this.isAdmin();
+    }
+    return false;
+  }
+
+  public canDeleteReservation(reservation: Reservation, siteArea: SiteArea): boolean {
+    if (this.canAccess(Entity.RESERVATION, Action.DELETE)) {
+      if (this.isComponentActive(TenantComponents.ORGANIZATION)) {
+        return this.isSiteAdmin(siteArea.siteID) || reservation.canDelete;
       }
       return this.isAdmin();
     }

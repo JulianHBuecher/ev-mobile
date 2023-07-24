@@ -1,14 +1,13 @@
 import I18n from 'i18n-js';
 import { Icon } from 'native-base';
 import React from 'react';
-import { View } from 'react-native';
-import { Button, CheckBox, Input } from 'react-native-elements';
+import { Switch, Text, View } from 'react-native';
+import { Button } from 'react-native-elements';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Orientation from 'react-native-orientation-locker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SelectDropdown from 'react-native-select-dropdown';
 import { scale } from 'react-native-size-matters';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import computeFormStyleSheet from '../../FormStyles';
 import I18nManager from '../../I18n/I18nManager';
@@ -49,9 +48,10 @@ interface State {
   expiryDate: Date;
   fromDate: Date;
   toDate: Date;
+  arrivalTime: Date;
+  departureTime: Date;
   selectedParentTag?: Tag;
   selectedCar?: Car;
-  reservationID: number;
   type: ReservationType;
   sessionContextLoading?: boolean;
   refreshing?: boolean;
@@ -71,7 +71,6 @@ export default class AddReservation extends BaseScreen<Props, State> {
   public constructor(props: Props) {
     super(props);
     this.state = {
-      reservationID: null,
       reservableChargingStations: null,
       selectedChargingStation: null,
       selectedConnector: null,
@@ -81,6 +80,8 @@ export default class AddReservation extends BaseScreen<Props, State> {
       expiryDate: null,
       fromDate: null,
       toDate: null,
+      arrivalTime: null,
+      departureTime: null,
       type: null,
       refreshing: false,
       isAdmin: false,
@@ -119,7 +120,8 @@ export default class AddReservation extends BaseScreen<Props, State> {
         selectedConnector,
         fromDate: moment().toDate(),
         toDate: moment().add(1, 'd').toDate(),
-        reservationID: Utils.generateRandomReservationID(),
+        arrivalTime: moment().toDate(),
+        departureTime: moment().add(1, 'h').toDate(),
         expiryDate: Utils.generateDateWithDelay(0, 1, 0, 0),
         alreadyReserved: alreadyReserved ?? false,
         inUse: inUse ?? false
@@ -145,6 +147,8 @@ export default class AddReservation extends BaseScreen<Props, State> {
       expiryDate,
       fromDate,
       toDate,
+      arrivalTime,
+      departureTime,
       sessionContextLoading,
       alreadyReserved,
       inUse
@@ -171,8 +175,50 @@ export default class AddReservation extends BaseScreen<Props, State> {
               <View style={[formStyle.inputTextContainer, formStyle.inputText, { paddingLeft: 0 }]}>
                 {this.renderDatePicker(
                   'reservations.expiryDate',
+                  'datetime',
                   (newExpiryDate: Date) => this.setState({ expiryDate: newExpiryDate }),
                   expiryDate
+                )}
+              </View>
+            </View>
+          )}
+          <View style={style.twoItemsContainer}>
+            {type === ReservationType.PLANNED_RESERVATION && (
+              <View style={[formStyle.inputContainer, { width: '45%' }]}>
+                <View style={[formStyle.inputTextContainer, formStyle.inputText, { paddingLeft: 0 }]}>
+                  {this.renderDatePicker(
+                    'reservations.fromDate',
+                    'date',
+                    (newFromDate: Date) => this.setState({ fromDate: newFromDate }),
+                    fromDate,
+                    null,
+                    toDate
+                  )}
+                </View>
+              </View>
+            )}
+            {type === ReservationType.PLANNED_RESERVATION && (
+              <View style={[formStyle.inputContainer, { width: '45%' }]}>
+                <View style={[formStyle.inputTextContainer, formStyle.inputText, { paddingLeft: 0 }]}>
+                  {this.renderDatePicker(
+                    'reservations.toDate',
+                    'date',
+                    (newToDate: Date) => this.setState({ toDate: newToDate }),
+                    toDate,
+                    fromDate
+                  )}
+                </View>
+              </View>
+            )}
+          </View>
+          {type === ReservationType.PLANNED_RESERVATION && (
+            <View style={[formStyle.inputContainer]}>
+              <View style={[formStyle.inputTextContainer, formStyle.inputText, { paddingLeft: 0 }]}>
+                {this.renderDatePicker(
+                  'reservations.arrivalTime',
+                  'time',
+                  (newArrivalTime: Date) => this.setState({ arrivalTime: newArrivalTime }),
+                  arrivalTime
                 )}
               </View>
             </View>
@@ -181,19 +227,11 @@ export default class AddReservation extends BaseScreen<Props, State> {
             <View style={[formStyle.inputContainer]}>
               <View style={[formStyle.inputTextContainer, formStyle.inputText, { paddingLeft: 0 }]}>
                 {this.renderDatePicker(
-                  'reservations.fromDate',
-                  (newFromDate: Date) => this.setState({ fromDate: newFromDate }),
-                  fromDate,
-                  null,
-                  toDate
+                  'reservations.departureTime',
+                  'time',
+                  (newDepartureTime: Date) => this.setState({ departureTime: newDepartureTime }),
+                  departureTime
                 )}
-              </View>
-            </View>
-          )}
-          {type === ReservationType.PLANNED_RESERVATION && (
-            <View style={[formStyle.inputContainer]}>
-              <View style={[formStyle.inputTextContainer, formStyle.inputText, { paddingLeft: 0 }]}>
-                {this.renderDatePicker('reservations.toDate', (newToDate: Date) => this.setState({ toDate: newToDate }), toDate, fromDate)}
               </View>
             </View>
           )}
@@ -214,7 +252,9 @@ export default class AddReservation extends BaseScreen<Props, State> {
                     WithSite: true,
                     WithSiteArea: true,
                     fromDate: this.state.fromDate ?? moment().toDate(),
-                    toDate: this.state.toDate ?? this.state.expiryDate ?? moment().add(1, 'd').toDate()
+                    toDate: this.state.toDate ?? this.state.expiryDate ?? moment().add(1, 'd').toDate(),
+                    arrivalTime: this.state.arrivalTime ?? null,
+                    departureTime: this.state.fromDate ?? null
                   }}
                   navigation={navigation}
                 />
@@ -295,39 +335,19 @@ export default class AddReservation extends BaseScreen<Props, State> {
             </View>
           )}
           {!alreadyReserved && !inUse && (
-            <View style={style.reservationTypeContainer}>
-              <CheckBox
-                containerStyle={formStyle.checkboxContainer}
-                textStyle={formStyle.checkboxText}
-                checked={type === ReservationType.RESERVE_NOW}
-                checkedIcon={<Icon size={scale(25)} color={commonColors.textColor} name="radiobox-marked" as={MaterialCommunityIcons} />}
-                uncheckedIcon={<Icon size={scale(25)} color={commonColors.textColor} name="radiobox-blank" as={MaterialCommunityIcons} />}
-                onPress={() =>
+            <View style={style.defaultContainer}>
+              <Switch
+                trackColor={{ true: commonColors.primary, false: commonColors.disabledDark }}
+                thumbColor={commonColors.disabled}
+                style={style.switch}
+                onValueChange={() =>
                   this.setState({
-                    type: ReservationType.RESERVE_NOW,
-                    expiryDate: moment().add(1, 'h').toDate(),
-                    fromDate: null,
-                    toDate: null
+                    type: type !== ReservationType.PLANNED_RESERVATION ? ReservationType.PLANNED_RESERVATION : ReservationType.RESERVE_NOW
                   })
                 }
-                title={I18n.t('reservations.types.reserve_now')}
+                value={type === ReservationType.PLANNED_RESERVATION}
               />
-              <CheckBox
-                containerStyle={formStyle.checkboxContainer}
-                textStyle={formStyle.checkboxText}
-                checked={type === ReservationType.PLANNED_RESERVATION}
-                checkedIcon={<Icon size={scale(25)} color={commonColors.textColor} name="radiobox-marked" as={MaterialCommunityIcons} />}
-                uncheckedIcon={<Icon size={scale(25)} color={commonColors.textColor} name="radiobox-blank" as={MaterialCommunityIcons} />}
-                onPress={() =>
-                  this.setState({
-                    type: ReservationType.PLANNED_RESERVATION,
-                    expiryDate: null,
-                    fromDate: moment().toDate(),
-                    toDate: moment().add(1, 'h').toDate()
-                  })
-                }
-                title={I18n.t('reservations.types.planned_reservation')}
-              />
+              <Text style={style.text}>{I18n.t('reservations.types.planned_reservation')}</Text>
             </View>
           )}
           <Button
@@ -349,7 +369,6 @@ export default class AddReservation extends BaseScreen<Props, State> {
   public async addReservation(): Promise<void> {
     if (this.checkForm()) {
       const {
-        reservationID,
         selectedChargingStation,
         selectedConnector,
         selectedTag,
@@ -358,11 +377,13 @@ export default class AddReservation extends BaseScreen<Props, State> {
         expiryDate,
         fromDate,
         toDate,
+        arrivalTime,
+        departureTime,
         type
       } = this.state;
       try {
         const reservation: Reservation = {
-          id: reservationID,
+          id: null,
           chargingStationID: selectedChargingStation.id,
           connectorID: selectedConnector.connectorId,
           idTag: (selectedTag?.id as string) ?? null,
@@ -370,6 +391,8 @@ export default class AddReservation extends BaseScreen<Props, State> {
           fromDate: fromDate ?? new Date(),
           toDate: toDate ?? expiryDate,
           expiryDate: toDate ?? expiryDate,
+          arrivalTime: arrivalTime ?? new Date(),
+          departureTime: departureTime ?? expiryDate,
           carID: (selectedCar?.id as string) ?? null,
           parentIdTag: selectedParentTag?.visualID ?? null,
           type,
@@ -381,7 +404,8 @@ export default class AddReservation extends BaseScreen<Props, State> {
         if (response?.status === RestResponse.SUCCESS) {
           Message.showSuccess(
             I18n.t('reservations.create.success', {
-              reservationID
+              chargingStationID: reservation.chargingStationID,
+              connectorID: Utils.getConnectorLetterFromConnectorID(reservation.connectorID)
             })
           );
           const routes = this.props.navigation.getState().routes;
@@ -403,6 +427,7 @@ export default class AddReservation extends BaseScreen<Props, State> {
 
   public renderDatePicker(
     title: string,
+    mode: 'date' | 'datetime' | 'time',
     onDateTimeChanged: (newDate: Date) => Promise<void> | void,
     date: Date,
     minDate?: Date,
@@ -412,15 +437,16 @@ export default class AddReservation extends BaseScreen<Props, State> {
     const maximumDate = maxDate ?? null;
     date = date ?? Utils.generateDateWithDelay(0, 1, 0, 0);
     const locale = this.currentUser?.locale;
-    const is24Hour = I18nManager?.isLocale24Hour(locale);
+    const is24Hour = mode === 'time' || mode === 'datetime' ? I18nManager?.isLocale24Hour(locale) : false;
     return (
       <DateTimePickerComponent
         title={title}
+        mode={mode}
         locale={locale}
         is24Hour={is24Hour}
-        minimumDateTime={minimumDate}
-        maximumDateTime={maximumDate}
-        dateTime={date}
+        lowerBound={minimumDate}
+        upperBound={maximumDate}
+        initialValue={date}
         onDateTimeChanged={onDateTimeChanged}
       />
     );
@@ -441,26 +467,29 @@ export default class AddReservation extends BaseScreen<Props, State> {
   }
 
   private checkForm(): boolean {
-    const { reservationID, selectedChargingStation, selectedConnector, selectedUser, selectedTag, expiryDate, fromDate, toDate, type } =
-      this.state;
+    const {
+      selectedChargingStation,
+      selectedConnector,
+      selectedUser,
+      selectedTag,
+      expiryDate,
+      fromDate,
+      toDate,
+      arrivalTime,
+      departureTime,
+      type
+    } = this.state;
     let valid = false;
     if (type === ReservationType.RESERVE_NOW) {
-      valid =
-        !!reservationID &&
-        !!selectedChargingStation &&
-        !!selectedConnector &&
-        !!selectedUser &&
-        !!selectedTag &&
-        this.checkDate(expiryDate) &&
-        !!type;
+      valid = !!selectedChargingStation && !!selectedConnector && !!selectedUser && !!selectedTag && this.checkDate(expiryDate) && !!type;
     } else {
       valid =
-        !!reservationID &&
         !!selectedChargingStation &&
         !!selectedConnector &&
         !!selectedUser &&
         !!selectedTag &&
         this.checkDateRange(fromDate, toDate) &&
+        this.checkDateRange(arrivalTime, departureTime) &&
         !!type;
     }
     return valid;

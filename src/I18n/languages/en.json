@@ -564,7 +564,7 @@
       "title": "Reserved Charging Station Blocked",
       "body": "At your currently reserved charging station '{{chargingStationID}}' on connector '{{connectorID}}' a charging session started."
     },
-    "reservationStatusChanged": {
+    "reservationStatusChangedNotification": {
       "title": "Reservation Status Changed",
       "body": "Your reservation for charging station '{{chargingStationID}}' on connector '{{connectorID}}' changed its status.",
       "status": {
@@ -572,8 +572,13 @@
         "reservation_scheduled": "Reservation Scheduled",
         "reservation_in_progress": "Reservation In Progress",
         "reservation_cancelled": "Reservation Cancelled",
-        "reservation_expired": "Reservation Expired"
+        "reservation_expired": "Reservation Expired",
+        "reservation_unmet": "Reservation Unmet"
       }
+    },
+    "reservationUnmetNotification": {
+      "title": "Reservation Unmet",
+      "body": "The reservation for charging station '{{chargingStationID}}' on connector '{{connectorID}}' is cancelled after absence of 15 minutes after reservation start."
     }
   },
   "appUpdate": {
@@ -606,8 +611,10 @@
     "connectorId": "Connector",
     "connectorStatus": "Connector Status",
     "expiryDate": "Expiration Date",
-    "fromDate": "Valid From",
-    "toDate": "Valid To",
+    "fromDate": "From",
+    "toDate": "To",
+    "arrivalTime": "Arrival Time",
+    "departureTime": "Departure Time",
     "tagId": "Tag",
     "status": "Status",
     "type": "Reservation Type",
@@ -624,6 +631,7 @@
       "reservation_in_progress": "In Progress",
       "reservation_cancelled": "Cancelled",
       "reservation_expired": "Expired",
+      "reservation_unmet": "Unmet",
       "unknown": "Unknown"
     },
     "types": {
@@ -652,7 +660,7 @@
       "tooltips": "Create Reservation",
       "confirm": "",
       "details": "",
-      "success": "'{{reservationID}}' has been created successfully",
+      "success": "Reservation on '{{chargingStationID}}' at connector '{{connectorID}}' has been created successfully",
       "error": "Error occurred while adding the reservation, check the logs"
     },
     "update": {
@@ -660,21 +668,21 @@
       "tooltips": "Update Reservation",
       "confirm": "",
       "details": "",
-      "success": "The reservation '{{reservationID}}' has been saved successfully",
+      "success": "The reservation has been saved successfully",
       "error": "Cannot change the reservation details, check the logs"
     },
     "delete": {
       "title": "Delete Reservation",
       "tooltips": "Delete Reservation",
-      "confirm": "Do you really want to delete the reservation '{{reservationID}}'?",
+      "confirm": "Do you really want to delete the reservation?",
       "details": "",
-      "success": "The reservation '{{reservationID}}' is successfully deleted",
+      "success": "The reservation on '{{chargingStationID}}' at connector '{{connectorID}}' is successfully deleted",
       "error": "An error occurred during the deletion of the reservation, check the logs"
     },
     "action_error": {
       "general": {
         "not_found": "The reservation has not been found",
-        "already_exists": "The reservation with the ID {{reservationID}} already exists for another user",
+        "already_exists": "The reservation with the same ID already exists for another user",
         "not_supported": "The feature 'Reservations' is not enabled for this charging station",
         "rejected": "The reservation was rejected",
         "collision": "This reservation collides with another reservation for this time slot. Choose another time",

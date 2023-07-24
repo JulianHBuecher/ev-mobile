@@ -7,16 +7,17 @@ import I18nManager from '../../I18n/I18nManager';
 import computeStyleSheet from './DateTimePickerComponentStyles';
 import Utils from '../../utils/Utils';
 import { scale } from 'react-native-size-matters';
-import Foundation from 'react-native-vector-icons/Foundation';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import Message from '../../utils/Message';
 import moment from 'moment';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export interface Props {
   title: string;
-  dateTime?: Date;
-  minimumDateTime?: Date;
-  maximumDateTime?: Date;
+  initialValue?: Date;
+  lowerBound?: Date;
+  upperBound?: Date;
+  mode?: 'date' | 'time' | 'datetime';
   locale?: string;
   is24Hour?: boolean;
   containerStyle?: ViewStyle[];
@@ -26,6 +27,7 @@ export interface Props {
 interface State {
   value: Date;
   openDateTimePicker: boolean;
+  isValid: boolean;
 }
 
 export default class DateTimePickerComponent extends React.Component<Props, State> {
@@ -37,7 +39,8 @@ export default class DateTimePickerComponent extends React.Component<Props, Stat
     this.onConfirm.bind(this);
     this.state = {
       value: null,
-      openDateTimePicker: false
+      openDateTimePicker: false,
+      isValid: false
     };
   }
 
@@ -54,37 +57,46 @@ export default class DateTimePickerComponent extends React.Component<Props, Stat
 
   public render() {
     const style = computeStyleSheet();
-    const { title, dateTime, minimumDateTime, maximumDateTime, locale, is24Hour, containerStyle } = this.props;
+    const { title, mode, initialValue, lowerBound, upperBound, locale, is24Hour, containerStyle } = this.props;
     const commonColors = Utils.getCurrentCommonColor();
     return (
       <View style={[...(containerStyle || [])]}>
-        <TouchableOpacity style={style.dateTimeContainer} onPress={() => this.setState({ openDateTimePicker: true })}>
+        <TouchableOpacity style={[this.determineRequiredHeight(mode, style)]} onPress={() => this.setState({ openDateTimePicker: true })}>
           <View style={style.calendarIconContainer}>
-            <Icon size={scale(28)} style={style.dateIcon} as={Foundation} name={'calendar'} />
+            <Icon
+              size={scale(28)}
+              style={[this.determineIconStyle(style)]}
+              as={MaterialCommunityIcons}
+              name={this.selectIconByMode(mode)}
+            />
           </View>
           <View style={style.contentContainer}>
             <Text numberOfLines={1} ellipsizeMode={'tail'} style={[style.text, style.title]}>
               {I18n.t(title)}
             </Text>
-            <Text numberOfLines={1} style={style.text}>
-              {I18nManager.formatDateTime(dateTime, { dateStyle: 'medium' })}
-            </Text>
-            <Text numberOfLines={1} style={style.text}>
-              {I18nManager.formatDateTime(dateTime, { timeStyle: 'medium' })}
-            </Text>
+            {['date', 'datetime'].includes(mode) && (
+              <Text numberOfLines={1} style={style.text}>
+                {I18nManager.formatDateTime(initialValue, { dateStyle: 'medium' })}
+              </Text>
+            )}
+            {['time', 'datetime'].includes(mode) && (
+              <Text numberOfLines={1} style={style.text}>
+                {I18nManager.formatDateTime(initialValue, { timeStyle: 'medium' })}
+              </Text>
+            )}
           </View>
         </TouchableOpacity>
         <DateTimePicker
           isVisible={this.state.openDateTimePicker}
-          mode={'datetime'}
+          mode={mode}
           locale={locale}
           is24Hour={is24Hour}
           cancelTextIOS={I18n.t('general.cancel')}
           confirmTextIOS={I18n.t('general.confirm')}
           buttonTextColorIOS={commonColors.textColor}
-          minimumDate={minimumDateTime}
-          maximumDate={maximumDateTime}
-          date={dateTime}
+          minimumDate={lowerBound}
+          maximumDate={upperBound}
+          date={initialValue}
           minuteInterval={5}
           onConfirm={(newDateTime: Date) => this.onConfirm(newDateTime)}
           onCancel={() => this.setState({ openDateTimePicker: false })}
@@ -93,26 +105,58 @@ export default class DateTimePickerComponent extends React.Component<Props, Stat
     );
   }
 
-  private onConfirm(newDateTime: Date) {
+  private onConfirm(newValue: Date) {
     const { onDateTimeChanged } = this.props;
     // Workaround to fix the bug from react-native-modal-datetime-picker
-    newDateTime = this.fitDateWithinMinAndMax(newDateTime);
-    this.setState({ openDateTimePicker: false, value: newDateTime }, () => onDateTimeChanged?.(newDateTime));
+    newValue = this.fitDateWithinMinAndMax(newValue);
+    this.setState({ openDateTimePicker: false, value: newValue }, () => onDateTimeChanged?.(newValue));
   }
 
   private fitDateWithinMinAndMax(date: Date): Date {
-    const { maximumDateTime, minimumDateTime } = this.props;
-    const parsedMinDateTime = moment(minimumDateTime);
-    const parsedMaxDateTime = moment(maximumDateTime);
+    const { upperBound, lowerBound } = this.props;
+    const parsedMinimum = moment(lowerBound);
+    const parsedMaximum = moment(upperBound);
     if (date) {
-      if (!parsedMinDateTime.isValid() && parsedMinDateTime.isAfter(date)) {
+      if (!parsedMinimum.isValid() && parsedMinimum.isAfter(date)) {
         Message.showError(I18n.t('reservations.invalidDateRange'));
-        return minimumDateTime;
-      } else if (!parsedMaxDateTime.isValid() && parsedMaxDateTime.isBefore(date)) {
+        this.setState({ isValid: false });
+        return lowerBound;
+      } else if (!parsedMaximum.isValid() && parsedMaximum.isBefore(date)) {
         Message.showError(I18n.t('reservations.invalidDateRange'));
-        return maximumDateTime;
+        this.setState({ isValid: false });
+        return upperBound;
       }
+      this.setState({ isValid: true });
     }
     return date;
+  }
+
+  private selectIconByMode(mode: 'date' | 'datetime' | 'time') {
+    switch (mode) {
+      case 'date':
+        return 'calendar';
+      case 'datetime':
+        return 'calendar-clock';
+      case 'time':
+        return 'clock';
+    }
+  }
+
+  private determineIconStyle(style: any) {
+    if (!this.state.value) {
+      return style.defaultDateIcon;
+    }
+    return this.state.isValid ? style.validDateIcon : style.invalidDateIcon;
+  }
+
+  private determineRequiredHeight(mode: 'date' | 'datetime' | 'time', style: any) {
+    switch (mode) {
+      case 'date':
+        return style.dateContainer;
+      case 'time':
+        return style.timeContainer;
+      case 'datetime':
+        return style.dateTimeContainer;
+    }
   }
 }

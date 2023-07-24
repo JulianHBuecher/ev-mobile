@@ -13,6 +13,7 @@ export default interface Reservation extends CreatedUpdatedProps, ListItem {
   toDate?: Date;
   expiryDate: Date;
   arrivalTime?: Date;
+  departureTime?: Date;
   idTag: string;
   visualTagID?: string;
   tag?: Tag;
@@ -21,6 +22,9 @@ export default interface Reservation extends CreatedUpdatedProps, ListItem {
   car?: Car;
   type: ReservationType;
   status?: ReservationStatusEnum;
+  canUpdate?: boolean;
+  canDelete?: boolean;
+  canCancelReservation?: boolean;
 }
 
 export enum ReservationStatus {
@@ -28,7 +32,8 @@ export enum ReservationStatus {
   SCHEDULED = 'reservation_scheduled',
   IN_PROGRESS = 'reservation_in_progress',
   CANCELLED = 'reservation_cancelled',
-  EXPIRED = 'reservation_expired'
+  EXPIRED = 'reservation_expired',
+  UNMET = 'reservation_unmet'
 }
 
 export enum ReservationType {

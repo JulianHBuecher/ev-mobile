@@ -1051,15 +1051,17 @@ export default class Utils {
     const commonColor = Utils.getCurrentCommonColor();
     switch (reservationStatus) {
       case ReservationStatus.DONE:
-        return <Icon size={scale(size)} as={MaterialIcons} name="done" style={[style.success]} />;
+        return <Icon size={scale(size)} as={MaterialIcons} name="done" color={commonColor.success} />;
       case ReservationStatus.CANCELLED:
-        return <Icon size={scale(size)} as={MaterialIcons} name="cancel" style={[style.danger]} />;
+        return <Icon size={scale(size)} as={MaterialIcons} name="cancel" color={commonColor.danger} />;
       case ReservationStatus.EXPIRED:
-        return <Icon size={scale(size)} as={MaterialIcons} name="hourglass-bottom" style={[style.danger]} />;
+        return <Icon size={scale(size)} as={MaterialIcons} name="hourglass-bottom" color={commonColor.danger} />;
+      case ReservationStatus.UNMET:
+        return <Icon size={scale(size)} as={MaterialIcons} name="hourglass-disabled" color={commonColor.disabledDark} />;
       case ReservationStatus.IN_PROGRESS:
-        return <Icon size={scale(size)} as={MaterialIcons} name="sync" style={[style.primary]} />;
+        return <Icon size={scale(size)} as={MaterialIcons} name="sync" color={commonColor.primary} />;
       case ReservationStatus.SCHEDULED:
-        return <Icon size={scale(size)} as={MaterialIcons} name="schedule" style={[style.info]} />;
+        return <Icon size={scale(size)} as={MaterialIcons} name="schedule" color={commonColor.info} />;
     }
   }
 
@@ -1085,6 +1087,8 @@ export default class Utils {
         return I18n.t('reservations.statuses.reservation_scheduled');
       case ReservationStatus.IN_PROGRESS:
         return I18n.t('reservations.statuses.reservation_in_progress');
+      case ReservationStatus.UNMET:
+        return I18n.t('reservations.statuses.reservation_unmet');
       default:
         return I18n.t('reservations.statuses.unknown');
     }
@@ -1112,6 +1116,8 @@ export default class Utils {
       case ReservationStatus.CANCELLED:
       case ReservationStatus.EXPIRED:
         return style.reservationStatusCancelled;
+      case ReservationStatus.UNMET:
+        return style.reservationStatusUnmet;
     }
   }
 
@@ -1212,6 +1218,11 @@ export default class Utils {
         return handled;
     }
     return handled;
+  }
+
+  public static buildDateTimeObject(date: Date, dateTime: Date, hours?: number, minutes?: number): Date {
+    const parsedDateTime = dateTime ? moment(dateTime) : moment({ hours, minutes });
+    return moment(date).hours(parsedDateTime.hours()).minutes(parsedDateTime.minutes()).toDate();
   }
 
   private static getDeviceLocale(): string {
