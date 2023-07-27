@@ -84,6 +84,7 @@ export default class ReservationDetails extends BaseAutoRefreshScreen<Props, Sta
     }
     siteArea = reservation.chargingStation.siteArea ?? null;
     site = reservation.chargingStation.site ?? null;
+    const connector = Utils.getConnectorFromID(reservation.chargingStation, reservation.connectorID);
     this.setState({
       reservation,
       loading: false,
@@ -92,7 +93,7 @@ export default class ReservationDetails extends BaseAutoRefreshScreen<Props, Sta
       isSiteAdmin: this.securityProvider && reservation && siteArea ? this.securityProvider.isSiteAdmin(site.id as string) : false,
       isCarActive: this.securityProvider.isComponentCarActive(),
       isSmartChargingActive: this.securityProvider.isComponentSmartCharging(),
-      canCancelReservation: reservation ? this.securityProvider.canCancelReservation(reservation, siteArea) : false,
+      canCancelReservation: reservation ? this.securityProvider.canCancelReservation(connector, siteArea) : false,
       canDeleteReservation: reservation ? this.securityProvider.canDeleteReservation(reservation, siteArea) : false
     });
   }

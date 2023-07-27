@@ -436,7 +436,7 @@ export default class ChargingStationConnectorDetails extends BaseAutoRefreshScre
 
   public canReserveNow = (chargingStation: ChargingStation, connector: Connector): boolean => {
     if (connector && connector.status === ChargePointStatus.AVAILABLE) {
-      return this.securityProvider?.canReserveNow(chargingStation?.siteArea);
+      return this.securityProvider?.canReserveNow(connector, chargingStation?.siteArea);
     }
     return false;
   };

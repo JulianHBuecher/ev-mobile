@@ -2,7 +2,7 @@ import I18n from 'i18n-js';
 import { Icon, Text, View } from 'native-base';
 import React from 'react';
 import { TouchableOpacity } from 'react-native';
-import { Button, Input } from 'react-native-elements';
+import { Button } from 'react-native-elements';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Orientation from 'react-native-orientation-locker';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -34,6 +34,8 @@ import User, { UserStatus } from '../../../../types/User';
 import Message from '../../../../utils/Message';
 import Utils from '../../../../utils/Utils';
 import computeStyleSheet from './ChargingStationConnectorReserveNowStyles';
+import moment from 'moment';
+import Constants from '../../../../utils/Constants';
 
 interface State {
   selectedChargingStation: ChargingStation;
@@ -44,7 +46,6 @@ interface State {
   expiryDate: Date;
   selectedParentTag?: Tag;
   selectedCar?: Car;
-  reservationID: number;
   sessionContextLoading?: boolean;
   refreshing?: boolean;
   isAdmin?: boolean;
@@ -62,8 +63,6 @@ export default class ReserveNow extends BaseScreen<Props, State> {
   private chargingStation: ChargingStation;
   private connector: Connector;
   private expiryDate: Date;
-  private carModalRef = React.createRef<ModalSelect<Car>>();
-  private tagModalRef = React.createRef<ModalSelect<Tag>>();
 
   public constructor(props: Props) {
     super(props);
@@ -75,7 +74,6 @@ export default class ReserveNow extends BaseScreen<Props, State> {
       expiryDate: null,
       selectedParentTag: null,
       selectedCar: null,
-      reservationID: null,
       refreshing: false,
       isAdmin: false,
       isSiteAdmin: false,
@@ -92,7 +90,7 @@ export default class ReserveNow extends BaseScreen<Props, State> {
     this.tag = Utils.getParamFromNavigation(this.props.route, 'tag', null) as unknown as Tag;
     this.chargingStation = Utils.getParamFromNavigation(this.props.route, 'chargingStation', null) as unknown as ChargingStation;
     this.connector = Utils.getParamFromNavigation(this.props.route, 'connector', null) as unknown as Connector;
-    this.expiryDate = Utils.generateDateWithDelay(0, 1, 0, 0);
+    this.expiryDate = moment().add(1, 'h').toDate();
     const currentUser = {
       id: currentUserToken?.id,
       firstName: currentUserToken?.firstName,
@@ -107,8 +105,7 @@ export default class ReserveNow extends BaseScreen<Props, State> {
         selectedTag: this.tag ?? this.state.selectedTag,
         selectedChargingStation: this.chargingStation,
         selectedConnector: this.connector,
-        expiryDate: this.expiryDate,
-        reservationID: Utils.generateRandomReservationID()
+        expiryDate: this.expiryDate
       },
       async () => await this.loadUserSessionContext()
     );
@@ -142,69 +139,57 @@ export default class ReserveNow extends BaseScreen<Props, State> {
           {this.state.selectedUser && (
             <View style={[formStyle.inputContainer]}>
               <View style={[formStyle.inputTextContainer, formStyle.inputText, { paddingLeft: 0 }]}>
-                {this.renderExpiryDatePicker(style, expiryDate)}
+                {this.renderExpiryDatePicker(
+                  'reservations.expiryDate',
+                  'datetime',
+                  (newExpiryDate: Date) => this.setState({ expiryDate: newExpiryDate }),
+                  expiryDate
+                )}
               </View>
             </View>
           )}
           {this.securityProvider?.canListUsers() && (
-            <Input
-              containerStyle={formStyle.inputContainer}
-              inputStyle={formStyle.inputText}
-              inputContainerStyle={[formStyle.inputTextContainer, selectedUser && { paddingLeft: 0 }]}
-              labelStyle={style.inputLabel}
-              renderErrorMessage={false}
-              InputComponent={() => (
+            <View style={[formStyle.inputContainer]}>
+              <View style={[formStyle.inputTextContainer, selectedUser && { paddingLeft: 0 }]}>
                 <ModalSelect<User>
                   openable={true}
                   disabled={false}
                   defaultItems={[selectedUser]}
                   renderItem={(user: User) => this.renderUser(style, user)}
+                  renderItemPlaceholder={() => this.renderUserPlaceholder(style)}
                   onItemsSelected={this.onUserSelected.bind(this)}
                   navigation={navigation}
                   selectionMode={ItemSelectionMode.SINGLE}>
                   <Users filters={{ issuer: true }} navigation={navigation} />
                 </ModalSelect>
-              )}
-            />
+              </View>
+            </View>
           )}
           {this.securityProvider?.canListTags() && (
-            <Input
-              containerStyle={formStyle.inputContainer}
-              inputStyle={formStyle.inputText}
-              inputContainerStyle={[formStyle.inputTextContainer, selectedTag && { paddingLeft: 0 }]}
-              labelStyle={style.inputLabel}
-              renderErrorMessage={false}
-              InputComponent={() => (
+            <View style={[formStyle.inputContainer]}>
+              <View style={[formStyle.inputTextContainer, selectedTag && { paddingLeft: 0 }]}>
                 <ModalSelect<Tag>
                   openable={true}
                   disabled={false}
                   defaultItems={[selectedTag]}
-                  renderNoItem={() => this.renderNoTag(style)}
-                  ref={this.tagModalRef}
                   renderItem={(tag: Tag) => this.renderTag(style, tag)}
+                  renderItemPlaceholder={() => this.renderTagPlaceholder(style)}
                   onItemsSelected={(tags: Tag[]) => this.setState({ selectedTag: tags?.[0] }, () => void this.loadUserSessionContext())}
                   navigation={navigation}
                   defaultItemLoading={sessionContextLoading}
                   selectionMode={ItemSelectionMode.SINGLE}>
                   <Tags disableInactive={true} sorting={'-active'} userIDs={[selectedUser?.id as string]} navigation={navigation} />
                 </ModalSelect>
-              )}
-            />
+              </View>
+            </View>
           )}
           {this.securityProvider?.isComponentCarActive() && (
-            <Input
-              containerStyle={formStyle.inputContainer}
-              inputStyle={formStyle.inputText}
-              inputContainerStyle={[formStyle.inputTextContainer, selectedTag && { paddingLeft: 0 }]}
-              labelStyle={style.inputLabel}
-              renderErrorMessage={false}
-              InputComponent={() => (
+            <View style={[formStyle.inputContainer]}>
+              <View style={[formStyle.inputTextContainer, selectedCar && { paddingLeft: 0 }]}>
                 <ModalSelect<Car>
                   openable={true}
                   disabled={false}
                   defaultItems={[selectedCar]}
-                  renderNoItem={() => this.renderNoCar(style)}
-                  ref={this.carModalRef}
                   renderItemPlaceholder={() => this.renderCarPlaceholder(style)}
                   renderItem={(car) => <CarComponent car={car} navigation={navigation} />}
                   onItemsSelected={(cars: Car[]) => this.setState({ selectedCar: cars?.[0] }, () => void this.loadUserSessionContext())}
@@ -213,8 +198,8 @@ export default class ReserveNow extends BaseScreen<Props, State> {
                   selectionMode={ItemSelectionMode.SINGLE}>
                   <Cars userIDs={[selectedUser?.id as string]} navigation={navigation} />
                 </ModalSelect>
-              )}
-            />
+              </View>
+            </View>
           )}
           <Button
             title={I18n.t('reservations.reserve_now.tooltips')}
@@ -234,8 +219,7 @@ export default class ReserveNow extends BaseScreen<Props, State> {
 
   public async reserveNow(): Promise<void> {
     if (this.checkForm()) {
-      const { reservationID, selectedChargingStation, selectedConnector, selectedTag, selectedParentTag, selectedCar, expiryDate } =
-        this.state;
+      const { selectedChargingStation, selectedConnector, selectedTag, selectedParentTag, selectedCar, expiryDate } = this.state;
       const connectorLetter = Utils.getConnectorLetterFromConnectorID(selectedConnector.connectorId);
       try {
         // Reserve the connector
@@ -244,8 +228,8 @@ export default class ReserveNow extends BaseScreen<Props, State> {
           selectedConnector.connectorId,
           expiryDate,
           selectedTag?.visualID,
-          reservationID,
           selectedCar?.id as string,
+          null,
           selectedParentTag?.visualID
         );
         if (response?.status === RestResponse.SUCCESS) {
@@ -263,41 +247,39 @@ export default class ReserveNow extends BaseScreen<Props, State> {
         // Enable the button
         this.setState({ buttonDisabled: false });
         // Other common Error
-        await Utils.handleHttpUnexpectedError(
-          this.centralServerProvider,
-          error,
-          'reservations.reserve_now.error',
-          this.props.navigation,
-          this.refresh.bind(this)
-        );
+        await Utils.handleHttpUnexpectedError(this.centralServerProvider, error, 'reservations.reserve_now.error', this.props.navigation);
       }
     }
   }
 
-  public renderExpiryDatePicker(style: any, expiryDate: Date) {
-    const minimumDate = new Date();
-    const maximumDate = new Date(new Date().getTime() + Utils.generateDateWithDelay(0, 2, 0, 0).getTime());
-    expiryDate = expiryDate ?? Utils.generateDateWithDelay(0, 1, 0, 0);
+  public renderExpiryDatePicker(
+    title: string,
+    mode: 'date' | 'datetime' | 'time',
+    onDateTimeChanged: (newDate: Date) => Promise<void> | void,
+    date: Date,
+    minDate: Date = new Date(),
+    maxDate: Date = moment().add(Constants.EXPIRY_DATE_THRESHHOLD, 'h').toDate()
+  ) {
+    date = date ?? moment().add(1, 'h').toDate();
     const locale = this.centralServerProvider.getUserInfo()?.locale;
     const is24Hour = I18nManager?.isLocale24Hour(locale);
     return (
       <DateTimePickerComponent
-        title={'reservations.expiryDate'}
+        title={title}
+        mode={mode}
         locale={locale}
         is24Hour={is24Hour}
-        lowerBound={minimumDate}
-        upperBound={maximumDate}
-        dateTime={expiryDate}
-        onDateTimeChanged={(newExpiryDate: Date) => this.setState({ expiryDate: newExpiryDate })}
+        lowerBound={minDate}
+        upperBound={maxDate}
+        initialValue={date}
+        onDateTimeChanged={onDateTimeChanged}
       />
     );
   }
 
   private checkForm(): boolean {
     const { selectedChargingStation, selectedConnector, selectedUser, selectedTag, selectedParentTag, expiryDate } = this.state;
-    return (
-      !!selectedChargingStation && !!selectedConnector && !!selectedUser && !!selectedTag && !!expiryDate && (!selectedParentTag ?? true)
-    );
+    return !!selectedChargingStation && !!selectedConnector && !!selectedUser && !!selectedTag && this.checkDate(expiryDate);
   }
 
   private renderUser(style: any, user: User) {
@@ -314,6 +296,21 @@ export default class ReserveNow extends BaseScreen<Props, State> {
     );
   }
 
+  private renderUserPlaceholder(style: any) {
+    return (
+      <SelectDropdown
+        disabled={true}
+        data={[]}
+        statusBarTranslucent={true}
+        defaultButtonText={I18n.t('users.user')}
+        defaultValue={null}
+        buttonStyle={style.selectField}
+        buttonTextStyle={{ ...style.selectFieldText, ...(!this.state.selectedUser ? style.selectFieldTextPlaceholder : {}) }}
+        renderDropdownIcon={() => <Icon style={style.dropdownIcon} size={scale(25)} as={MaterialIcons} name={'arrow-drop-down'} />}
+      />
+    );
+  }
+
   private renderTag(style: any, tag: Tag) {
     return (
       <SelectDropdown
@@ -324,6 +321,21 @@ export default class ReserveNow extends BaseScreen<Props, State> {
         buttonStyle={style.selectField}
         buttonTextStyle={style.selectFieldText}
         renderDropdownIcon={() => <Icon size={scale(25)} as={MaterialIcons} style={style.dropdownIcon} name={'arrow-drop-down'} />}
+      />
+    );
+  }
+
+  private renderTagPlaceholder(style: any) {
+    return (
+      <SelectDropdown
+        disabled={true}
+        data={[]}
+        statusBarTranslucent={true}
+        defaultButtonText={I18n.t('tags.tag')}
+        defaultValue={null}
+        buttonStyle={style.selectField}
+        buttonTextStyle={{ ...style.selectFieldText, ...(!this.state.selectedTag ? style.selectFieldTextPlaceholder : {}) }}
+        renderDropdownIcon={() => <Icon style={style.dropdownIcon} size={scale(25)} as={MaterialIcons} name={'arrow-drop-down'} />}
       />
     );
   }
@@ -415,8 +427,6 @@ export default class ReserveNow extends BaseScreen<Props, State> {
   private onUserSelected(selectedUsers: User[]): void {
     const selectedUser = selectedUsers?.[0];
     // Reset errors and selected fields when new user selected
-    this.tagModalRef?.current?.resetInput();
-    this.carModalRef?.current?.resetInput();
     this.setState(
       {
         selectedUser,
@@ -428,5 +438,10 @@ export default class ReserveNow extends BaseScreen<Props, State> {
         void this.loadUserSessionContext();
       }
     );
+  }
+
+  private checkDate(date: Date): boolean {
+    const parsedDate = moment(date);
+    return date && parsedDate.isValid();
   }
 }

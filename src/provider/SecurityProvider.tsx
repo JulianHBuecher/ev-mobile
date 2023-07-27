@@ -164,13 +164,13 @@ export default class SecurityProvider {
     return false;
   }
 
-  public canCancelReservation(reservation: Reservation, siteArea: SiteArea): boolean {
+  public canCancelReservation(connector: Connector, siteArea: SiteArea, reservation?: Reservation): boolean {
     if (
       this.canAccess(Entity.CHARGING_STATION, Action.CANCEL_RESERVATION) ||
       this.canAccess(Entity.RESERVATION, Action.CANCEL_RESERVATION)
     ) {
       if (this.isComponentActive(TenantComponents.ORGANIZATION)) {
-        return this.isSiteAdmin(siteArea.siteID) || reservation.canCancelReservation;
+        return this.isSiteAdmin(siteArea.siteID) || connector?.canCancelReservation || reservation?.canCancelReservation;
       }
       return this.isAdmin();
     }

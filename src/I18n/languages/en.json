@@ -623,7 +623,9 @@
     "reservationsUnexpectedError": "Cannot read reservations",
     "reservationDoesNotExist": "Reservation does not exist",
     "noReservations": "No reservations found",
-    "invalidDate": "Invalid date",
+    "invalidDate": "Invalid date.",
+    "dateBeforeMinimum": "Invalid date. Date must be in the future.",
+    "dateAfterMaximum": "Invalid date. Date exceeds maximum duration of {{duration}} hours.",
     "invalidDateRange": "Invalid date range. End date is before start date",
     "statuses": {
       "reservation_done": "Done",

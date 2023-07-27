@@ -11,6 +11,7 @@ import DateTimePicker from 'react-native-modal-datetime-picker';
 import Message from '../../utils/Message';
 import moment from 'moment';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Constants from '../../utils/Constants';
 
 export interface Props {
   title: string;
@@ -114,19 +115,23 @@ export default class DateTimePickerComponent extends React.Component<Props, Stat
 
   private fitDateWithinMinAndMax(date: Date): Date {
     const { upperBound, lowerBound } = this.props;
+    const parsedInput = moment(date);
     const parsedMinimum = moment(lowerBound);
     const parsedMaximum = moment(upperBound);
-    if (date) {
-      if (!parsedMinimum.isValid() && parsedMinimum.isAfter(date)) {
-        Message.showError(I18n.t('reservations.invalidDateRange'));
+    if (date && parsedInput.isValid()) {
+      if (parsedInput.isBefore(parsedMinimum)) {
+        Message.showError(I18n.t('reservations.dateBeforeMinimum'));
         this.setState({ isValid: false });
         return lowerBound;
-      } else if (!parsedMaximum.isValid() && parsedMaximum.isBefore(date)) {
-        Message.showError(I18n.t('reservations.invalidDateRange'));
+      } else if (parsedInput.isAfter(parsedMaximum)) {
+        Message.showError(I18n.t('reservations.dateAfterMaximum', { duration: parsedInput.diff(parsedMaximum, 'hours') }));
         this.setState({ isValid: false });
         return upperBound;
       }
       this.setState({ isValid: true });
+    } else {
+      Message.showError(I18n.t('reservations.invalidDate'));
+      this.setState({ isValid: false });
     }
     return date;
   }

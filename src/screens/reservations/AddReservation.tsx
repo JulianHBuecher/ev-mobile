@@ -37,6 +37,7 @@ import Cars from '../../screens/cars/Cars';
 import ReservableChargingStations from '../../screens/charging-stations/list/ReservableChargingStations';
 import moment from 'moment';
 import ReservableChargingStationComponent from '../../components/charging-station/ReservableChargingStationComponent';
+import Constants from '../../utils/Constants';
 
 interface State {
   reservableChargingStations: ChargingStation[];
@@ -122,7 +123,7 @@ export default class AddReservation extends BaseScreen<Props, State> {
         toDate: moment().add(1, 'd').toDate(),
         arrivalTime: moment().toDate(),
         departureTime: moment().add(1, 'h').toDate(),
-        expiryDate: Utils.generateDateWithDelay(0, 1, 0, 0),
+        expiryDate: moment().add(1, 'h').toDate(),
         alreadyReserved: alreadyReserved ?? false,
         inUse: inUse ?? false
       },
@@ -187,12 +188,12 @@ export default class AddReservation extends BaseScreen<Props, State> {
               <View style={[formStyle.inputContainer, { width: '45%' }]}>
                 <View style={[formStyle.inputTextContainer, formStyle.inputText, { paddingLeft: 0 }]}>
                   {this.renderDatePicker(
-                    'reservations.fromDate',
+                    'reservations.toDate',
                     'date',
-                    (newFromDate: Date) => this.setState({ fromDate: newFromDate }),
+                    (newToDate: Date) => this.setState({ toDate: newToDate }),
+                    toDate,
                     fromDate,
-                    null,
-                    toDate
+                    null
                   )}
                 </View>
               </View>
@@ -201,11 +202,12 @@ export default class AddReservation extends BaseScreen<Props, State> {
               <View style={[formStyle.inputContainer, { width: '45%' }]}>
                 <View style={[formStyle.inputTextContainer, formStyle.inputText, { paddingLeft: 0 }]}>
                   {this.renderDatePicker(
-                    'reservations.toDate',
+                    'reservations.fromDate',
                     'date',
-                    (newToDate: Date) => this.setState({ toDate: newToDate }),
-                    toDate,
-                    fromDate
+                    (newFromDate: Date) => this.setState({ fromDate: newFromDate }),
+                    fromDate,
+                    new Date(),
+                    toDate
                   )}
                 </View>
               </View>
@@ -230,7 +232,9 @@ export default class AddReservation extends BaseScreen<Props, State> {
                   'reservations.departureTime',
                   'time',
                   (newDepartureTime: Date) => this.setState({ departureTime: newDepartureTime }),
-                  departureTime
+                  departureTime,
+                  null,
+                  null
                 )}
               </View>
             </View>
@@ -430,12 +434,10 @@ export default class AddReservation extends BaseScreen<Props, State> {
     mode: 'date' | 'datetime' | 'time',
     onDateTimeChanged: (newDate: Date) => Promise<void> | void,
     date: Date,
-    minDate?: Date,
-    maxDate?: Date
+    minDate: Date = new Date(),
+    maxDate: Date = moment().add(Constants.TIME_RANGE_THRESHHOLD, 'h').toDate()
   ) {
-    const minimumDate = minDate ?? moment().toDate();
-    const maximumDate = maxDate ?? null;
-    date = date ?? Utils.generateDateWithDelay(0, 1, 0, 0);
+    date = date ?? moment().add(1, 'h').toDate();
     const locale = this.currentUser?.locale;
     const is24Hour = mode === 'time' || mode === 'datetime' ? I18nManager?.isLocale24Hour(locale) : false;
     return (
@@ -444,8 +446,8 @@ export default class AddReservation extends BaseScreen<Props, State> {
         mode={mode}
         locale={locale}
         is24Hour={is24Hour}
-        lowerBound={minimumDate}
-        upperBound={maximumDate}
+        lowerBound={minDate}
+        upperBound={maxDate}
         initialValue={date}
         onDateTimeChanged={onDateTimeChanged}
       />

@@ -1229,7 +1229,7 @@ export default class CentralServerProvider {
     }
     const body = {
       args: {
-        reservationId,
+        reservationId: reservationId ?? null,
         connectorId,
         expiryDate,
         visualTagID,

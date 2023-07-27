@@ -1171,14 +1171,6 @@ export default class Utils {
     return [...userEndpoints, ...staticEndpoints];
   }
 
-  public static generateDateWithDelay(days?: number, hours?: number, minutes?: number, seconds?: number): Date {
-    return new Date(Date.now() + 3600 * 1000 * 24 * days + 3600 * 1000 * hours + 3600 * minutes + seconds);
-  }
-
-  public static generateRandomReservationID(): number {
-    return Math.floor(Math.random() * 1000000000 + 1);
-  }
-
   public static handleReservationResponses(error: any) {
     let handled = false;
     switch (error?.response?.status) {

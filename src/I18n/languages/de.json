@@ -623,6 +623,8 @@
     "reservationDoesNotExist": "Reservierungen konnte nicht gefunden werden",
     "noReservations": "Keine Reservierungen",
     "invalidDate": "Ungültiges Datum",
+    "dateBeforeMinimum": "Ungültiges Datum. Wähle ein Datum in der Zukunft.",
+    "dateAfterMaximum": "Ungültiges Datum. Datum liegt außerhalb des zulässigen Bereichs von {{duration}} Stunden.",
     "invalidDateRange": "Ungültige Zeitspanne",
     "statuses": {
       "reservation_done": "Abgeschlossen",
