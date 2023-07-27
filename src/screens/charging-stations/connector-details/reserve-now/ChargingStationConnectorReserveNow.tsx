@@ -228,8 +228,8 @@ export default class ReserveNow extends BaseScreen<Props, State> {
           selectedConnector.connectorId,
           expiryDate,
           selectedTag?.visualID,
-          selectedCar?.id as string,
           null,
+          selectedCar?.id as string,
           selectedParentTag?.visualID
         );
         if (response?.status === RestResponse.SUCCESS) {
